@@ -1,11 +1,19 @@
-use axum::{Json, Router, routing::get};
-use serde_json::{Value, json};
+use axum::{routing::get, Json, Router};
+use serde::Serialize;
 
-/// Registers health-check endpoints used by load balancers and uptime monitors.
-pub fn router() -> Router {
-    Router::new().route("/health", get(health_check))
+#[derive(Serialize)]
+struct HealthResponse {
+    status: String,
+    service: String,
 }
 
-async fn health_check() -> Json<Value> {
-    Json(json!({ "status": "ok" }))
+async fn health_check() -> Json<HealthResponse> {
+    Json(HealthResponse {
+        status: "ok".to_string(),
+        service: "solance-backend".to_string(),
+    })
+}
+
+pub fn router() -> Router {
+    Router::new().route("/health", get(health_check))
 }
