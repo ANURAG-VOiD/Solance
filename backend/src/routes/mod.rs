@@ -6,3 +6,6 @@ pub mod invoices;
 pub mod user;
 pub mod tasks;
 pub mod bids;
+pub mod dashboard;
+pub mod notifications;
+pub mod ws;

@@ -13,6 +13,7 @@ use axum::http::{header, HeaderValue, Method};
 use axum::Router;
 use config::Config;
 use db::create_pool;
+use services::realtime_service::RealtimeHub;
 use state::AppState;
 use auth::nonce_store::NonceStore;
 use std::sync::Arc;
@@ -27,12 +28,14 @@ async fn main() {
 
     let pool = create_pool(&config.database_url)
         .await
-        .expect("Failed to connect to database");
+        .expect("Failed to initialize database");
 
     let app_state = Arc::new(AppState {
         db: pool,
         nonces: NonceStore::new(),
         jwt_secret: config.jwt_secret.clone(),
+        // Keep a bounded buffer so slow websocket clients do not block writers.
+        realtime: RealtimeHub::new(512),
     });
 
     let cors = CorsLayer::new()
@@ -56,6 +59,9 @@ async fn main() {
         .nest("/api/tasks", routes::tasks::router(app_state.clone()))
         .nest("/api/bids", routes::bids::router(app_state.clone()))
         .nest("/api/users", routes::user::router(app_state.clone()))
+        .nest("/api/dashboard", routes::dashboard::router(app_state.clone()))
+        .nest("/api/notifications", routes::notifications::router(app_state.clone()))
+        .nest("/api/ws", routes::ws::router(app_state.clone()))
         .layer(cors)
         .with_state(app_state);
 

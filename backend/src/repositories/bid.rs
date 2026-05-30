@@ -2,7 +2,7 @@ use rust_decimal::Decimal;
 use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
 
-use crate::models::{Bid, Chat, Task};
+use crate::models::{Bid, Chat, MyBidWithTask, Task};
 
 pub struct BidRepository {
     pool: PgPool,
@@ -60,6 +60,80 @@ impl BidRepository {
         .bind(task_id)
         .fetch_all(&self.pool)
         .await
+    }
+
+    pub async fn list_by_freelancer_wallet(
+        &self,
+        wallet: &str,
+    ) -> Result<Vec<MyBidWithTask>, sqlx::Error> {
+        #[derive(sqlx::FromRow)]
+        struct MyBidTaskRow {
+            bid_id: Uuid,
+            bid_task_id: Uuid,
+            bid_freelancer_wallet: String,
+            bid_cover_letter: String,
+            bid_proposed_amount: Decimal,
+            bid_status: String,
+            bid_created_at: chrono::DateTime<chrono::Utc>,
+            task_id: Uuid,
+            task_client_wallet: String,
+            task_title: String,
+            task_description: String,
+            task_budget: Decimal,
+            task_status: String,
+            task_created_at: chrono::DateTime<chrono::Utc>,
+        }
+
+        let rows = sqlx::query_as::<_, MyBidTaskRow>(
+            r#"
+            SELECT
+                b.id AS bid_id,
+                b.task_id AS bid_task_id,
+                b.freelancer_wallet AS bid_freelancer_wallet,
+                b.cover_letter AS bid_cover_letter,
+                b.proposed_amount AS bid_proposed_amount,
+                b.status AS bid_status,
+                b.created_at AS bid_created_at,
+                t.id AS task_id,
+                t.client_wallet AS task_client_wallet,
+                t.title AS task_title,
+                t.description AS task_description,
+                t.budget AS task_budget,
+                t.status AS task_status,
+                t.created_at AS task_created_at
+            FROM bids b
+            INNER JOIN tasks t ON t.id = b.task_id
+            WHERE b.freelancer_wallet = $1
+            ORDER BY b.created_at DESC
+            "#,
+        )
+        .bind(wallet)
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(rows
+            .into_iter()
+            .map(|row| MyBidWithTask {
+                bid: Bid {
+                    id: row.bid_id,
+                    task_id: row.bid_task_id,
+                    freelancer_wallet: row.bid_freelancer_wallet,
+                    cover_letter: row.bid_cover_letter,
+                    proposed_amount: row.bid_proposed_amount,
+                    status: row.bid_status,
+                    created_at: row.bid_created_at,
+                },
+                task: Task {
+                    id: row.task_id,
+                    client_wallet: row.task_client_wallet,
+                    title: row.task_title,
+                    description: row.task_description,
+                    budget: row.task_budget,
+                    status: row.task_status,
+                    created_at: row.task_created_at,
+                },
+            })
+            .collect())
     }
 
     /// Accepts a bid, rejects competing pending bids, moves task to in_progress, and opens a chat room.

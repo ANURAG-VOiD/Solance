@@ -50,6 +50,18 @@ pub struct Invoice {
     pub created_at: DateTime<Utc>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct Notification {
+    pub id: Uuid,
+    pub user_wallet: String,
+    pub notification_type: String,
+    pub title: String,
+    pub body: String,
+    pub href: String,
+    pub read: bool,
+    pub created_at: DateTime<Utc>,
+}
+
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct Task {
     pub id: Uuid,
@@ -100,4 +112,32 @@ pub struct AcceptBidResponse {
     pub bid: Bid,
     pub task: Task,
     pub chat: Chat,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct DashboardStatsResponse {
+    pub freelancer: FreelancerDashboardStats,
+    pub client: ClientDashboardStats,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct FreelancerDashboardStats {
+    pub applied_jobs: i64,
+    pub active_contracts: i64,
+    pub unread_messages: i64,
+    pub pending_invoices: i64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ClientDashboardStats {
+    pub active_jobs: i64,
+    pub applications_received: i64,
+    pub ongoing_projects: i64,
+    pub pending_payments: i64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct MyBidWithTask {
+    pub bid: Bid,
+    pub task: Task,
 }

@@ -7,16 +7,11 @@ import { ProjectMockup } from "@/components/landing/ProjectMockup";
 import { Button } from "@/components/shared/ui/Button";
 import { useAuth, useWalletConnectionStatus } from "@/context/AuthContext";
 
+// Wallet button is client-only; render lazily to avoid SSR hydration mismatches.
 const WalletMultiButton = dynamic(
   async () => (await import("@solana/wallet-adapter-react-ui")).WalletMultiButton,
   { ssr: false },
 );
-
-const STATS = [
-  { value: "1,200+", label: "Developers" },
-  { value: "340+",   label: "Projects" },
-  { value: "8,900",  label: "SOL Settled" },
-];
 
 interface HeroSectionProps {
   callbackUrl: string;
@@ -27,79 +22,51 @@ export function HeroSection({ callbackUrl }: HeroSectionProps) {
   const { connected } = useWalletConnectionStatus();
 
   return (
-    <section className="relative overflow-hidden border-b border-border/60">
-      {/* Multi-layer gradient mesh */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-accent-violet/8 blur-3xl" />
-        <div className="absolute top-1/4 -right-16 h-80 w-80 rounded-full bg-brand/8 blur-3xl" />
-        <div className="absolute -bottom-12 left-1/3 h-64 w-64 rounded-full bg-accent-teal/6 blur-3xl" />
-        {/* Grid lines */}
-        <div
-          className="absolute inset-0 opacity-[0.025]"
-          style={{
-            backgroundImage: "linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px)",
-            backgroundSize: "64px 64px",
-          }}
-        />
-      </div>
+    <section className="relative overflow-hidden border-b border-border">
+      {/* Calm depth: faint grid + a single soft top wash (no neon, no purple glow). */}
+      <div className="bg-grid-faint absolute inset-0 [mask-image:radial-gradient(ellipse_at_top,_black_30%,_transparent_75%)]" />
+      <div className="pointer-events-none absolute -top-32 left-1/2 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-brand/10 blur-[120px]" />
 
-      <div className="relative mx-auto grid max-w-7xl gap-12 px-6 py-24 lg:grid-cols-2 lg:items-center lg:py-32">
-        {/* Left — Copy */}
-        <div className="animate-slide-up">
-          {/* Eyebrow */}
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand/25 bg-brand/10 px-3.5 py-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-brand animate-dot-pulse" />
-            <span className="text-xs font-semibold tracking-wide text-brand">
-              Solance · Wallet-native freelancing
-            </span>
-          </div>
+      <div className="relative mx-auto max-w-7xl px-6 pt-20 pb-12 lg:pt-28">
+        <div className="mx-auto max-w-3xl text-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-text-muted">
+            <span className="h-1.5 w-1.5 rounded-full bg-gradient-solana" />
+            Wallet-native freelancing on Solana
+          </span>
 
-          {/* Headline */}
-          <h1 className="text-5xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl">
-            <span className="gradient-text-hero block">Work. Collaborate.</span>
-            <span className="gradient-text block mt-1">Get Paid.</span>
+          {/* Primary headline per brand spec — gradient reserved for one line only. */}
+          <h1 className="mt-6 text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl">
+            Hire. Collaborate. Pay.
+            <span className="mt-2 block text-gradient-solana">All from your wallet.</span>
           </h1>
 
-          <p className="mt-6 max-w-lg text-base leading-relaxed text-text-muted">
-            A structured developer workspace for hiring, messaging, and settling invoices directly on Solana.{" "}
-            <span className="text-text">No middlemen.</span>
+          <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-text-muted">
+            A premium workspace for posting work, messaging in real time, and settling
+            invoices directly on-chain — no passwords, no middlemen.
           </p>
 
-          {/* CTAs */}
-          <div className="mt-8 flex flex-wrap gap-3">
-            <WalletMultiButton className="!h-11 !rounded-xl !bg-gradient-to-r !from-brand !to-brand-hover !px-6 !font-semibold !text-sm hover:!shadow-xl hover:!shadow-brand/30" />
-
+          <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
+            <WalletMultiButton className="!h-11 !rounded-md !bg-brand !px-6 hover:!bg-brand-hover" />
             {connected && !isAuthenticated && (
-              <Button size="lg" onClick={() => signIn(callbackUrl)} isLoading={isSigningIn}>
-                Sign In with Wallet
+              <Button size="lg" onClick={() => signIn(callbackUrl)} disabled={isSigningIn}>
+                {isSigningIn ? "Signing in…" : "Sign in with wallet"}
               </Button>
             )}
             {isAuthenticated && (
               <Link href="/dashboard">
-                <Button size="lg" variant="secondary">Open Workspace</Button>
+                <Button size="lg" variant="secondary">Open workspace</Button>
               </Link>
             )}
             <a href="#jobs">
-              <Button size="lg" variant="glass">Browse Opportunities</Button>
+              <Button size="lg" variant="secondary">Browse opportunities</Button>
             </a>
-          </div>
-
-          {/* Stats row */}
-          <div className="mt-10 flex flex-wrap gap-6 border-t border-border/50 pt-8">
-            {STATS.map(({ value, label }) => (
-              <div key={label} className="text-center sm:text-left">
-                <p className="text-xl font-bold text-text">{value}</p>
-                <p className="text-xs text-text-muted font-medium">{label}</p>
-              </div>
-            ))}
           </div>
         </div>
 
-        {/* Right — Mockup */}
-        <div className="hidden animate-slide-up animate-delay-200 lg:block">
-          <div className="animate-float">
-            <ProjectMockup />
-          </div>
+        {/* The product UI itself is the hero visual — centered as the centerpiece. */}
+        <div className="relative mx-auto mt-16 max-w-5xl">
+          <div className="pointer-events-none absolute -inset-x-8 -top-8 bottom-0 rounded-3xl bg-gradient-to-b from-brand/10 to-transparent blur-2xl" />
+          <ProjectMockup />
         </div>
       </div>
     </section>

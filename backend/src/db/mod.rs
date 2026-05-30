@@ -1,3 +1,3 @@
 pub mod connection;
 
-pub use connection::{create_pool, DbPool};
+pub use connection::{create_pool, DbInitError, DbPool};

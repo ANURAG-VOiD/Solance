@@ -1,26 +1,15 @@
-   0.171346834s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="sign_auth"}: cargo::core::compiler::fingerprint: fingerprint error for backend v0.1.0 (/Users/anuragmishra/Solance/backend)/Check { test: false }/TargetInner { kind: "example", name: "sign_auth", tested: false, benched: false, ..: with_path("/Users/anuragmishra/Solance/backend/examples/sign_auth.rs", Edition2024) }
-   0.171364250s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="sign_auth"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/anuragmishra/Solance/backend/target/debug/.fingerprint/backend-a4af233b513195a5/example-sign_auth`
-
-Caused by:
-    No such file or directory (os error 2)
-
-Stack backtrace:
-   0: <std::backtrace::Backtrace>::create
-   1: cargo_util::paths::read_bytes
-   2: cargo_util::paths::read
-   3: cargo::core::compiler::fingerprint::_compare_old_fingerprint
-   4: cargo::core::compiler::fingerprint::prepare_target
-   5: cargo::core::compiler::compile
-   6: <cargo::core::compiler::build_runner::BuildRunner>::compile
-   7: cargo::ops::cargo_compile::compile_ws
-   8: cargo::ops::cargo_compile::compile_with_exec
-   9: cargo::ops::cargo_compile::compile
-  10: cargo::commands::check::exec
-  11: <cargo::cli::Exec>::exec
-  12: cargo::main
-  13: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
-  14: std::rt::lang_start::<()>::{closure#0}
-  15: std::rt::lang_start_internal
-  16: _main
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on build directory
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.33s
+nd"}: cargo::core::compiler::fingerprint: stale: changed "/Users/anuragmishra/Solance/backend/src/db/mod.rs"
+   0.238492291s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint:           (vs) "/Users/anuragmishra/Solance/backend/target/debug/.fingerprint/backend-fed826d02bb552b5/dep-bin-backend"
+   0.238495125s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint:                FileTime { seconds: 1780167228, nanos: 997839612 } < FileTime { seconds: 1780168394, nanos: 497811311 }
+   0.239659875s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint: fingerprint dirty for backend v0.1.0 (/Users/anuragmishra/Solance/backend)/Check { test: false }/TargetInner { name: "backend", doc: true, ..: with_path("/Users/anuragmishra/Solance/backend/src/main.rs", Edition2024) }
+   0.239773416s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint:     dirty: FsStatusOutdated(StaleItem(ChangedFile { reference: "/Users/anuragmishra/Solance/backend/target/debug/.fingerprint/backend-fed826d02bb552b5/dep-bin-backend", reference_mtime: FileTime { seconds: 1780167228, nanos: 997839612 }, stale: "/Users/anuragmishra/Solance/backend/src/db/mod.rs", stale_mtime: FileTime { seconds: 1780168394, nanos: 497811311 } }))
+   0.323213291s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint: stale: changed "/Users/anuragmishra/Solance/backend/src/error.rs"
+   0.323221458s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint:           (vs) "/Users/anuragmishra/Solance/backend/target/debug/.fingerprint/backend-9f3250ddde0e119d/dep-test-bin-backend"
+   0.323223166s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint:                FileTime { seconds: 1780167228, nanos: 997856654 } < FileTime { seconds: 1780168392, nanos: 800439754 }
+   0.323455666s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint: fingerprint dirty for backend v0.1.0 (/Users/anuragmishra/Solance/backend)/Check { test: true }/TargetInner { name: "backend", doc: true, ..: with_path("/Users/anuragmishra/Solance/backend/src/main.rs", Edition2024) }
+   0.323461708s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint:     dirty: FsStatusOutdated(StaleItem(ChangedFile { reference: "/Users/anuragmishra/Solance/backend/target/debug/.fingerprint/backend-9f3250ddde0e119d/dep-test-bin-backend", reference_mtime: FileTime { seconds: 1780167228, nanos: 997856654 }, stale: "/Users/anuragmishra/Solance/backend/src/error.rs", stale_mtime: FileTime { seconds: 1780168392, nanos: 800439754 } }))
     Checking backend v0.1.0 (/Users/anuragmishra/Solance/backend)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.37s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.36s

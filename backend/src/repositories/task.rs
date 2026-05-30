@@ -61,6 +61,20 @@ impl TaskRepository {
         .await
     }
 
+    pub async fn list_by_client_wallet(&self, wallet: &str) -> Result<Vec<Task>, sqlx::Error> {
+        sqlx::query_as::<_, Task>(
+            r#"
+            SELECT id, client_wallet, title, description, budget, status, created_at
+            FROM tasks
+            WHERE client_wallet = $1
+            ORDER BY created_at DESC
+            "#,
+        )
+        .bind(wallet)
+        .fetch_all(&self.pool)
+        .await
+    }
+
     pub async fn update_status(&self, id: Uuid, status: &str) -> Result<Task, sqlx::Error> {
         sqlx::query_as::<_, Task>(
             r#"

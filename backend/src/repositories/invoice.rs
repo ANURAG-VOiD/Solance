@@ -51,6 +51,20 @@ impl InvoiceRepository {
         Ok(invoice)
     }
 
+    pub async fn list_by_wallet(&self, wallet: &str) -> Result<Vec<Invoice>, sqlx::Error> {
+        sqlx::query_as::<_, Invoice>(
+            r#"
+            SELECT id, sender_wallet, receiver_wallet, amount, status, created_at
+            FROM invoices
+            WHERE sender_wallet = $1 OR receiver_wallet = $1
+            ORDER BY created_at DESC
+            "#,
+        )
+        .bind(wallet)
+        .fetch_all(&self.pool)
+        .await
+    }
+
     pub async fn update_status(&self, id: Uuid, status: &str) -> Result<Invoice, sqlx::Error> {
         let invoice = sqlx::query_as::<_, Invoice>(
             r#"

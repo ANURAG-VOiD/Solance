@@ -80,4 +80,14 @@ impl TaskService {
             .await
             .map_err(|_| TaskServiceError::Internal)
     }
+
+    pub async fn list_my_tasks(
+        pool: &PgPool,
+        client_wallet: &str,
+    ) -> Result<Vec<Task>, TaskServiceError> {
+        TaskRepository::new(pool.clone())
+            .list_by_client_wallet(client_wallet)
+            .await
+            .map_err(|_| TaskServiceError::Internal)
+    }
 }

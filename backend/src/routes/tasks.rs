@@ -10,9 +10,11 @@ use uuid::Uuid;
 
 use crate::{
     auth::{middleware::require_auth, AuthUser},
+    error::{api_error, ApiError},
     models::{Bid, CreateBidRequest, CreateTaskRequest, Task},
     services::{
         bid_service::{BidService, BidServiceError},
+        notification_service::{CreateNotificationInput, NotificationService},
         task_service::{TaskService, TaskServiceError},
     },
     state::AppState,
@@ -25,6 +27,7 @@ pub fn router(state: Arc<AppState>) -> Router<Arc<AppState>> {
 
     let protected = Router::new()
         .route("/", post(create_task))
+        .route("/mine", get(list_my_tasks))
         .route("/{id}/bids", post(create_bid).get(list_bids))
         .route_layer(middleware::from_fn_with_state(state, require_auth));
 
@@ -45,6 +48,17 @@ async fn create_task(
         ) => Err(StatusCode::BAD_REQUEST),
         Err(TaskServiceError::Internal) => Err(StatusCode::INTERNAL_SERVER_ERROR),
         Err(TaskServiceError::NotFound) => Err(StatusCode::NOT_FOUND),
+    }
+}
+
+async fn list_my_tasks(
+    State(state): State<Arc<AppState>>,
+    auth: AuthUser,
+) -> Result<Json<Vec<Task>>, StatusCode> {
+    match TaskService::list_my_tasks(&state.db, &auth.wallet).await {
+        Ok(tasks) => Ok(Json(tasks)),
+        Err(TaskServiceError::Internal) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+        Err(_) => Err(StatusCode::BAD_REQUEST),
     }
 }
 
@@ -75,19 +89,49 @@ async fn create_bid(
     auth: AuthUser,
     Path(task_id): Path<Uuid>,
     Json(payload): Json<CreateBidRequest>,
-) -> Result<(StatusCode, Json<Bid>), StatusCode> {
+) -> Result<(StatusCode, Json<Bid>), ApiError> {
     match BidService::create_bid(&state.db, task_id, &auth.wallet, payload).await {
-        Ok(bid) => Ok((StatusCode::CREATED, Json(bid))),
+        Ok(bid) => {
+            if let Ok(task) = TaskService::get_task(&state.db, task_id).await {
+                let _ = NotificationService::create_notification(
+                    &state.db,
+                    &state.realtime,
+                    CreateNotificationInput {
+                        user_wallet: task.client_wallet,
+                        notification_type: "application".to_string(),
+                        title: "New proposal received".to_string(),
+                        body: format!("A freelancer submitted a bid on '{}'.", task.title),
+                        href: format!("/jobs/{}/applicants", task.id),
+                    },
+                )
+                .await;
+            }
+            Ok((StatusCode::CREATED, Json(bid)))
+        }
         Err(
-            BidServiceError::InvalidCoverLetter
+            e @ (BidServiceError::InvalidCoverLetter
             | BidServiceError::InvalidAmount
             | BidServiceError::SameWallet
-            | BidServiceError::TaskNotOpen,
-        ) => Err(StatusCode::BAD_REQUEST),
-        Err(BidServiceError::TaskNotFound) => Err(StatusCode::NOT_FOUND),
-        Err(BidServiceError::Conflict) => Err(StatusCode::CONFLICT),
-        Err(BidServiceError::Internal) => Err(StatusCode::INTERNAL_SERVER_ERROR),
-        Err(BidServiceError::Forbidden | BidServiceError::NotFound) => Err(StatusCode::FORBIDDEN),
+            | BidServiceError::TaskNotOpen),
+        ) => Err(api_error(StatusCode::BAD_REQUEST, e.to_string())),
+        Err(BidServiceError::TaskNotFound) => {
+            Err(api_error(StatusCode::NOT_FOUND, BidServiceError::TaskNotFound.to_string()))
+        }
+        Err(BidServiceError::DuplicateBid) => {
+            Err(api_error(StatusCode::CONFLICT, BidServiceError::DuplicateBid.to_string()))
+        }
+        Err(BidServiceError::Internal) => {
+            Err(api_error(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                BidServiceError::Internal.to_string(),
+            ))
+        }
+        Err(e @ (BidServiceError::Forbidden | BidServiceError::NotFound)) => {
+            Err(api_error(StatusCode::FORBIDDEN, e.to_string()))
+        }
+        Err(BidServiceError::BidStateConflict) => {
+            Err(api_error(StatusCode::CONFLICT, BidServiceError::BidStateConflict.to_string()))
+        }
     }
 }
 

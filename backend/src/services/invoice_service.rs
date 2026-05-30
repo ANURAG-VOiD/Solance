@@ -87,6 +87,16 @@ impl InvoiceService {
         Ok(invoice)
     }
 
+    pub async fn list_invoices_for_wallet(
+        pool: &PgPool,
+        wallet: &str,
+    ) -> Result<Vec<Invoice>, InvoiceServiceError> {
+        InvoiceRepository::new(pool.clone())
+            .list_by_wallet(wallet)
+            .await
+            .map_err(|_| InvoiceServiceError::Internal)
+    }
+
     pub async fn update_status(
         pool: &PgPool,
         id: Uuid,

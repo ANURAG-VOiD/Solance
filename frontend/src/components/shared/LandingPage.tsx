@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
-import { Zap, ExternalLink } from "lucide-react";
 
 import { HeroSection } from "@/components/landing/HeroSection";
 import { TrustMatrix } from "@/components/landing/TrustMatrix";
@@ -12,6 +11,7 @@ import { FeaturedTalent } from "@/components/landing/FeaturedTalent";
 import { FeaturedJobs } from "@/components/landing/FeaturedJobs";
 import { WalletStatus } from "@/components/shared/WalletStatus";
 import { LoadingState } from "@/components/shared/states/LoadingState";
+import { Button } from "@/components/shared/ui/Button";
 import { useAuth } from "@/context/AuthContext";
 
 const WalletMultiButton = dynamic(
@@ -32,41 +32,38 @@ function LandingContent() {
 
   return (
     <div className="min-h-screen bg-void text-text">
-      {/* Sticky frosted nav */}
-      <header className="sticky top-0 z-50 border-b border-border/60 glass-strong">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
-          {/* Logo */}
-          <Link href="/" className="group flex items-center gap-2.5">
-            <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand to-brand-hover shadow-lg shadow-brand/30 group-hover:shadow-brand/50 transition-shadow duration-200">
-              <Zap className="h-4 w-4 text-white" aria-hidden="true" />
+      <header className="sticky top-0 z-50 border-b border-border bg-void/80 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-solana">
+              <span className="text-sm font-bold text-white">S</span>
             </div>
-            <span className="text-base font-bold tracking-tight">Solance</span>
+            <span className="text-lg font-semibold tracking-tight">Solance</span>
           </Link>
-
           <nav className="hidden items-center gap-8 text-sm md:flex" aria-label="Public">
-            {[
-              { label: "Talent",    href: "#talent" },
-              { label: "Jobs",      href: "#jobs" },
-              { label: "Workspace", href: "/dashboard" },
-            ].map(({ label, href }) => (
-              <a
-                key={label}
-                href={href}
-                className="text-text-muted hover:text-text transition-colors duration-150 font-medium"
-              >
-                {label}
-              </a>
-            ))}
+            <Link href="/marketplace" className="text-text-muted transition-colors hover:text-text">Marketplace</Link>
+            <a href="#jobs" className="text-text-muted transition-colors hover:text-text">Jobs</a>
+            <a
+              href="https://github.com/solance"
+              rel="noopener noreferrer"
+              target="_blank"
+              className="text-text-muted transition-colors hover:text-text"
+            >
+              Docs
+            </a>
           </nav>
-
-          <WalletMultiButton className="!h-9 !rounded-lg !bg-gradient-to-r !from-brand !to-brand-hover !font-semibold hover:!shadow-brand/30 hover:!shadow-lg" />
+          <div className="flex items-center gap-2">
+            <Link href="/dashboard" className="hidden sm:block">
+              <Button variant="secondary" size="sm">Launch app</Button>
+            </Link>
+            <WalletMultiButton className="!h-9 !rounded-md !bg-brand hover:!bg-brand-hover" />
+          </div>
         </div>
-
-        {/* Mobile sub-nav */}
-        <div className="mx-auto flex max-w-7xl items-center gap-4 border-t border-border/40 px-5 py-2 text-xs text-text-muted md:hidden">
-          <a href="#talent" className="hover:text-text transition-colors">Talent</a>
-          <a href="#jobs" className="hover:text-text transition-colors">Jobs</a>
-          <Link href="/dashboard" className="hover:text-text transition-colors">Workspace</Link>
+        <div className="mx-auto flex max-w-7xl items-center gap-4 border-t border-border px-4 py-2 text-xs text-text-muted md:hidden">
+          <Link href="/marketplace" className="hover:text-text">Marketplace</Link>
+          <a href="#jobs" className="hover:text-text">Jobs</a>
+          <a href="https://github.com/solance" rel="noopener noreferrer" target="_blank" className="hover:text-text">Docs</a>
+          <Link href="/dashboard" className="hover:text-text">Launch app</Link>
         </div>
       </header>
 
@@ -75,43 +72,27 @@ function LandingContent() {
         <TrustMatrix />
         <FeaturedTalent />
         <FeaturedJobs />
-
-        {/* Wallet CTA section */}
-        <section className="border-t border-border/60 py-16 relative overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_50%,rgba(255,107,0,0.04),transparent)]" />
-          <div className="relative mx-auto max-w-md px-6">
+        <section className="border-t border-border py-12">
+          <div className="mx-auto max-w-md px-6">
             <WalletStatus callbackUrl={callback} />
           </div>
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border/60 py-10">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-            <div className="flex items-center gap-2">
-              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-brand to-brand-hover">
-                <Zap className="h-3 w-3 text-white" aria-hidden="true" />
-              </div>
-              <span className="text-sm font-semibold">Solance</span>
-              <span className="text-xs text-text-subtle">· Wallet-native developer workspace</span>
+      <footer className="border-t border-border py-8">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 sm:flex-row">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-6 w-6 items-center justify-center rounded bg-gradient-solana">
+              <span className="text-[10px] font-bold text-white">S</span>
             </div>
-            <div className="flex flex-wrap gap-5 text-xs text-text-muted">
-              <span className="hover:text-text cursor-pointer transition-colors">Documentation</span>
-              <span className="hover:text-text cursor-pointer transition-colors">Terms</span>
-              <span className="hover:text-text cursor-pointer transition-colors">Privacy</span>
-              <a
-                href="https://github.com"
-                rel="noopener noreferrer"
-                className="hover:text-text transition-colors flex items-center gap-1"
-              >
-                GitHub <ExternalLink className="h-3 w-3" />
-              </a>
-            </div>
+            <p className="text-xs text-text-muted">© {new Date().getFullYear()} Solance · Wallet-native workspace</p>
           </div>
-          <p className="mt-6 text-center text-xs text-text-subtle">
-            © {new Date().getFullYear()} Solance. Built on Solana.
-          </p>
+          <div className="flex flex-wrap gap-5 text-xs text-text-muted">
+            <a href="https://github.com/solance" target="_blank" rel="noopener noreferrer" className="hover:text-text">Docs</a>
+            <a href="#" className="hover:text-text">Terms</a>
+            <a href="#" className="hover:text-text">Privacy</a>
+            <a href="https://github.com/solance" target="_blank" rel="noopener noreferrer" className="hover:text-text">GitHub</a>
+          </div>
         </div>
       </footer>
     </div>

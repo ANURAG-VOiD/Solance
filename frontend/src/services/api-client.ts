@@ -28,7 +28,20 @@ export async function apiFetch<T>(
 
   if (!response.ok) {
     const text = await response.text();
-    throw new ApiClientError(text || `Request failed (${response.status})`, response.status);
+    let message = text || `Request failed (${response.status})`;
+
+    if (text) {
+      try {
+        const parsed = JSON.parse(text) as { error?: string };
+        if (typeof parsed.error === "string" && parsed.error.length > 0) {
+          message = parsed.error;
+        }
+      } catch {
+        // Keep raw response text when body is not JSON.
+      }
+    }
+
+    throw new ApiClientError(message, response.status);
   }
 
   if (response.status === 204) {

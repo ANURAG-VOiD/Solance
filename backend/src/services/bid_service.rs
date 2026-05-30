@@ -3,7 +3,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::{
-    models::{AcceptBidResponse, Bid, CreateBidRequest},
+    models::{AcceptBidResponse, Bid, CreateBidRequest, MyBidWithTask},
     repositories::{bid::BidRepository, task::TaskRepository},
 };
 
@@ -20,7 +20,8 @@ pub enum BidServiceError {
     TaskNotOpen,
     NotFound,
     Forbidden,
-    Conflict,
+    DuplicateBid,
+    BidStateConflict,
     Internal,
 }
 
@@ -29,13 +30,14 @@ impl std::fmt::Display for BidServiceError {
         match self {
             Self::InvalidCoverLetter => write!(f, "cover letter must not be empty"),
             Self::InvalidAmount => write!(f, "proposed amount must be greater than zero"),
-            Self::SameWallet => write!(f, "client cannot bid on their own task"),
+            Self::SameWallet => write!(f, "you cannot bid on your own task"),
             Self::TaskNotFound => write!(f, "task not found"),
-            Self::TaskNotOpen => write!(f, "task is not open for bids"),
+            Self::TaskNotOpen => write!(f, "this task is no longer open for bids"),
             Self::NotFound => write!(f, "bid not found"),
             Self::Forbidden => write!(f, "not authorized for this task"),
-            Self::Conflict => write!(f, "bid conflict"),
-            Self::Internal => write!(f, "internal bid error"),
+            Self::DuplicateBid => write!(f, "You have already submitted a bid for this task"),
+            Self::BidStateConflict => write!(f, "this bid can no longer be accepted"),
+            Self::Internal => write!(f, "failed to submit bid"),
         }
     }
 }
@@ -84,9 +86,10 @@ impl BidService {
             .map_err(|error| {
                 if let sqlx::Error::Database(db_error) = &error {
                     if db_error.constraint() == Some("bids_unique_freelancer_per_task") {
-                        return BidServiceError::Conflict;
+                        return BidServiceError::DuplicateBid;
                     }
                 }
+                tracing::error!(%error, "failed to create bid");
                 BidServiceError::Internal
             })
     }
@@ -138,7 +141,7 @@ impl BidService {
         }
 
         if bid.status != "pending" {
-            return Err(BidServiceError::Conflict);
+            return Err(BidServiceError::BidStateConflict);
         }
 
         BidRepository::new(pool.clone())
@@ -146,9 +149,22 @@ impl BidService {
             .await
             .map(|(bid, task, chat)| AcceptBidResponse { bid, task, chat })
             .map_err(|error| match error {
-                sqlx::Error::RowNotFound => BidServiceError::Conflict,
-                _ => BidServiceError::Internal,
+                sqlx::Error::RowNotFound => BidServiceError::BidStateConflict,
+                other => {
+                    tracing::error!(%other, "failed to accept bid");
+                    BidServiceError::Internal
+                }
             })
+    }
+
+    pub async fn list_my_bids(
+        pool: &PgPool,
+        freelancer_wallet: &str,
+    ) -> Result<Vec<MyBidWithTask>, BidServiceError> {
+        BidRepository::new(pool.clone())
+            .list_by_freelancer_wallet(freelancer_wallet)
+            .await
+            .map_err(|_| BidServiceError::Internal)
     }
 }
 
