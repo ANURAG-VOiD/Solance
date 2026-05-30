@@ -70,9 +70,13 @@ mod tests {
 
     #[test]
     fn issue_and_validate_token_roundtrip() {
-        let user = User {
+                let user = User {
             id: Uuid::new_v4(),
             wallet_address: "7YLw3qnPNM5uomPqiA2GUydD2dDDHHVfhssNzKZpkadb".to_string(),
+            title: None,
+            bio: None,
+            skills: None,
+            avatar_cid: None,
             created_at: Utc::now(),
         };
 
@@ -89,6 +93,10 @@ mod tests {
         let user = User {
             id: Uuid::new_v4(),
             wallet_address: "7YLw3qnPNM5uomPqiA2GUydD2dDDHHVfhssNzKZpkadb".to_string(),
+            title: None,
+            bio: None,
+            skills: None,
+            avatar_cid: None,
             created_at: Utc::now(),
         };
 
