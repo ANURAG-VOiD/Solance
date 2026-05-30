@@ -1,7 +1,8 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { BadgeCheck, Upload } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { BadgeCheck, Sparkles, Upload } from "lucide-react";
 
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Input } from "@/components/shared/ui/Input";
@@ -17,6 +18,12 @@ const SUGGESTED_SKILLS = ["Rust", "Solana", "Anchor", "React", "PostgreSQL"];
 
 export function ProfilePageContent() {
   const { user, refreshUser } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  // Set during first-time onboarding by AuthContext.signIn. `next` holds the
+  // route the visitor was originally headed to (e.g. /jobs/new).
+  const isOnboarding = searchParams.get("onboarding") === "1";
+  const nextRoute = searchParams.get("next");
   const [title, setTitle] = useState("");
   const [bio, setBio] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
@@ -56,6 +63,11 @@ export function ProfilePageContent() {
       await updateProfile({ title: title.trim() || undefined, bio: bio.trim() || undefined, skills: skills.length ? skills : undefined, avatar_cid: avatarCid.trim() || undefined });
       await refreshUser();
       setSuccess(true);
+      // After onboarding, continue to the route the visitor originally wanted
+      // (e.g. post a job); otherwise drop them into their dashboard.
+      if (isOnboarding) {
+        router.push(nextRoute ?? "/dashboard");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save");
     } finally {
@@ -67,7 +79,26 @@ export function ProfilePageContent() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader title="My Profile" description="LinkedIn-style developer card linked to your wallet" />
+      <PageHeader
+        title={isOnboarding ? "Welcome to Solance" : "My Profile"}
+        description={
+          isOnboarding
+            ? "Set up your profile so clients and freelancers know who they're working with."
+            : "LinkedIn-style developer card linked to your wallet"
+        }
+      />
+
+      {isOnboarding && (
+        <div className="mb-6 flex items-start gap-3 rounded-2xl border border-brand/20 bg-brand/5 p-4">
+          <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
+          <div>
+            <p className="text-sm font-semibold">Your wallet is connected — finish your profile</p>
+            <p className="mt-0.5 text-sm text-text-muted">
+              Add a name, avatar and skills. {nextRoute ? "We'll take you to the next step right after." : "You can update these anytime."}
+            </p>
+          </div>
+        </div>
+      )}
 
       <Card className="mb-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -112,7 +143,15 @@ export function ProfilePageContent() {
         </div>
         {error && <p role="alert" className="text-sm text-danger">{error}</p>}
         {success && <p className="text-sm text-success">Profile saved.</p>}
-        <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Save profile"}</Button>
+        <Button type="submit" disabled={saving}>
+          {saving
+            ? "Saving…"
+            : isOnboarding
+              ? nextRoute
+                ? "Save & continue"
+                : "Save & go to dashboard"
+              : "Save profile"}
+        </Button>
       </form>
     </div>
   );

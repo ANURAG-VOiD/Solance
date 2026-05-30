@@ -1,28 +1,28 @@
 @import "tailwindcss";
 
 /*
- * Solance design system — "Midnight" premium dark theme.
- * Inspiration: Linear / Vercel / Stripe dark mode (calm, high-contrast, no neon).
- * The Solana gradient is reserved for sparing accent use via the
- * `.text-gradient-solana` / `.bg-gradient-solana` utilities below.
+ * Solance design system — light, premium enterprise theme.
+ * Reference language: Linear + Stripe + Notion + Raycast.
+ * Calm neutrals, soft shadows, dark-navy primary. No neon, no dark-first UI.
+ * The Solana brand gradient is reserved for the logo mark / sparse accents only.
  */
 :root {
-  --color-void: #050816; /* app background */
-  --color-surface: #0d1222; /* panels / cards */
-  --color-surface-hover: #161d33; /* hover / elevated panels */
-  --color-border: rgba(255, 255, 255, 0.08); /* hairline borders */
-  --color-brand: #6366f1; /* primary interactive accent (indigo) */
-  --color-brand-hover: #4f56e0;
-  --color-text: #ffffff; /* primary text */
-  --color-text-muted: #94a3b8; /* secondary text (slate-400) */
-  --color-success: #22c55e;
-  --color-warning: #eab308;
-  --color-danger: #ef4444;
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
+  --color-void: #f9fafb; /* page background */
+  --color-surface: #ffffff; /* cards / panels */
+  --color-surface-hover: #f1f5f9; /* slate-100 hover */
+  --color-border: #e2e8f0; /* slate-200 hairlines */
+  --color-brand: #0a152d; /* primary (deep navy) — buttons, active states */
+  --color-brand-hover: #1e293b;
+  --color-text: #0a1b33; /* primary text */
+  --color-text-muted: #64748b; /* secondary text (slate-500) */
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
   /* Solana brand gradient — used sparingly for decorative accents only. */
   --gradient-solana: linear-gradient(120deg, #9945ff 0%, #14f195 100%);
-  /* Aliases for shared components */
+  /* Aliases consumed by shared components. */
   --color-bg: var(--color-void);
   --color-bg-subtle: var(--color-surface);
   --color-accent: var(--color-brand);
@@ -45,14 +45,16 @@
   --color-bg-subtle: var(--color-bg-subtle);
   --color-accent: var(--color-accent);
   --color-accent-hover: var(--color-accent-hover);
-  --font-sans: var(--font-geist-sans);
+  /* Inter = body (--font-sans); Outfit = headings (--font-display). */
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-outfit);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--color-void);
   color: var(--color-text);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
 }
 
 :focus-visible {
@@ -60,21 +62,24 @@ body {
   outline-offset: 2px;
 }
 
+/* --- Wallet adapter (light) --- */
 .wallet-adapter-modal-wrapper {
-  background: rgba(5, 8, 22, 0.9) !important;
-  backdrop-filter: blur(12px);
+  background: rgba(15, 23, 42, 0.35) !important;
+  backdrop-filter: blur(8px);
 }
 
 .wallet-adapter-modal-container {
-  background: #0d1222 !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  border-radius: 0.75rem !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 1.5rem !important;
+  color: #0a1b33 !important;
 }
 
 .wallet-adapter-button-trigger {
   background: var(--color-brand) !important;
-  border-radius: var(--radius-md) !important;
-  font-weight: 500 !important;
+  border-radius: 9999px !important;
+  font-weight: 600 !important;
+  color: #ffffff !important;
 }
 
 .wallet-adapter-button-trigger:hover {
@@ -94,10 +99,7 @@ body {
 }
 
 /*
- * Sparing Solana-gradient accents.
- * `.text-gradient-solana` clips the gradient to text (wordmark, headline highlight);
- * `.bg-gradient-solana` paints decorative fills (thin rules, dots, icon chips).
- * Use these intentionally and rarely — the base theme stays calm and neutral.
+ * Sparing Solana-gradient accents (logo mark, the occasional highlight).
  */
 .text-gradient-solana {
   background-image: var(--gradient-solana);
@@ -110,10 +112,29 @@ body {
   background-image: var(--gradient-solana);
 }
 
-/* Subtle grid texture for premium hero backgrounds (no neon glow). */
-.bg-grid-faint {
-  background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: 56px 56px;
+/*
+ * Seamless infinite logo marquee. The track holds two identical sequences and
+ * shifts by -50% for a gap-free loop; pauses on hover; honours reduced motion.
+ */
+@keyframes solance-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: solance-marquee 36s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
 }

@@ -9,7 +9,8 @@ export function Card({ children, className, ...props }: CardProps) {
   return (
     <div
       className={cn(
-        "rounded-md border border-border bg-surface p-4",
+        // Design system: soft enterprise cards (white surface, slate border).
+        "rounded-2xl border border-border bg-surface p-4",
         className,
       )}
       {...props}

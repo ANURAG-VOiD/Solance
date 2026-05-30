@@ -87,7 +87,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         saveSession(token, user);
         setSession({ token, user });
-        router.push(callbackUrl);
+
+        // First-time onboarding: a brand-new wallet has no profile title yet.
+        // Route them to /profile to set a name, avatar and skills before
+        // continuing to wherever they were headed (preserved as `next`).
+        const needsOnboarding = !user.title || user.title.trim() === "";
+        if (needsOnboarding) {
+          const params = new URLSearchParams({ onboarding: "1" });
+          if (callbackUrl && !callbackUrl.startsWith("/profile")) {
+            params.set("next", callbackUrl);
+          }
+          router.push(`/profile?${params.toString()}`);
+        } else {
+          router.push(callbackUrl);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Sign-in failed");
       } finally {
