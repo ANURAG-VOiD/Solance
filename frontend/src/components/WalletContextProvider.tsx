@@ -7,9 +7,14 @@ import {
   WalletError,
   WalletNotReadyError,
 } from "@solana/wallet-adapter-base";
-import { PhantomWalletAdapter, SolflareWalletAdapter } from "@solana/wallet-adapter-wallets";
+import {
+  PhantomWalletAdapter,
+  SolflareWalletAdapter,
+} from "@solana/wallet-adapter-wallets";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { clusterApiUrl } from "@solana/web3.js";
+
+import { AuthProvider } from "@/context/AuthContext";
 
 import "@solana/wallet-adapter-react-ui/styles.css";
 
@@ -29,7 +34,6 @@ export const WalletContextProvider: FC<Props> = ({ children }) => {
     [],
   );
 
-  // Wait for client mount before autoConnect so extensions (window.phantom) are injected.
   const [autoConnect, setAutoConnect] = useState(false);
 
   useEffect(() => {
@@ -37,16 +41,16 @@ export const WalletContextProvider: FC<Props> = ({ children }) => {
   }, []);
 
   const onError = useCallback((error: WalletError) => {
-    // Expected during startup when extensions aren't injected yet — not actionable.
     if (error instanceof WalletNotReadyError) return;
-
     console.warn("Wallet error:", error.message || error.name);
   }, []);
 
   return (
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect={autoConnect} onError={onError}>
-        <WalletModalProvider>{children}</WalletModalProvider>
+        <WalletModalProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
   );
