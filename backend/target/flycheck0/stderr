@@ -1,16 +1,11 @@
-   0.304849416s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint: stale: changed "/Users/anuragmishra/Solance/backend/src/main.rs"
-   0.304888208s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint:           (vs) "/Users/anuragmishra/Solance/backend/target/debug/.fingerprint/backend-e1a11a7c5c3d626b/dep-bin-backend"
-   0.304890625s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint:                FileTime { seconds: 1780084205, nanos: 937338687 } < FileTime { seconds: 1780084587, nanos: 723351805 }
-   0.305369875s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint: fingerprint dirty for backend v0.1.0 (/Users/anuragmishra/Solance/backend)/Check { test: false }/TargetInner { name: "backend", doc: true, ..: with_path("/Users/anuragmishra/Solance/backend/src/main.rs", Edition2024) }
-   0.305394708s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint:     dirty: FsStatusOutdated(StaleItem(ChangedFile { reference: "/Users/anuragmishra/Solance/backend/target/debug/.fingerprint/backend-e1a11a7c5c3d626b/dep-bin-backend", reference_mtime: FileTime { seconds: 1780084205, nanos: 937338687 }, stale: "/Users/anuragmishra/Solance/backend/src/main.rs", stale_mtime: FileTime { seconds: 1780084587, nanos: 723351805 } }))
-   0.353387750s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint: fingerprint error for backend v0.1.0 (/Users/anuragmishra/Solance/backend)/Check { test: true }/TargetInner { name: "backend", doc: true, ..: with_path("/Users/anuragmishra/Solance/backend/src/main.rs", Edition2024) }
-   0.353404750s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/anuragmishra/Solance/backend/target/debug/.fingerprint/backend-4c437f7485aef04f/test-bin-backend`
+   0.115015375s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint: fingerprint error for backend v0.1.0 (/Users/anuragmishra/Solance/backend)/Check { test: false }/TargetInner { name: "backend", doc: true, ..: with_path("/Users/anuragmishra/Solance/backend/src/main.rs", Edition2024) }
+   0.115029708s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/anuragmishra/Solance/backend/target/debug/.fingerprint/backend-b1a3a7418e12b2e7/bin-backend`
 
 Caused by:
     No such file or directory (os error 2)
 
 Stack backtrace:
-   0: std::backtrace::Backtrace::create
+   0: <std::backtrace::Backtrace>::create
    1: cargo_util::paths::read_bytes
    2: cargo_util::paths::read
    3: cargo::core::compiler::fingerprint::_compare_old_fingerprint
@@ -27,5 +22,57 @@ Stack backtrace:
   14: std::rt::lang_start::<()>::{closure#0}
   15: std::rt::lang_start_internal
   16: _main
+   0.169634833s  INFO prepare_target{force=false package_id=tower-http v0.6.11 target="tower_http"}: cargo::core::compiler::fingerprint: fingerprint error for tower-http v0.6.11/Check { test: false }/TargetInner { ..: lib_target("tower_http", ["lib"], "/Users/anuragmishra/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tower-http-0.6.11/src/lib.rs", Edition2018) }
+   0.169660125s  INFO prepare_target{force=false package_id=tower-http v0.6.11 target="tower_http"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/anuragmishra/Solance/backend/target/debug/.fingerprint/tower-http-5d62a7b3c04eb6d1/lib-tower_http`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: <std::backtrace::Backtrace>::create
+   1: cargo_util::paths::read_bytes
+   2: cargo_util::paths::read
+   3: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   4: cargo::core::compiler::fingerprint::prepare_target
+   5: cargo::core::compiler::compile
+   6: cargo::core::compiler::compile
+   7: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   8: cargo::ops::cargo_compile::compile_ws
+   9: cargo::ops::cargo_compile::compile_with_exec
+  10: cargo::ops::cargo_compile::compile
+  11: cargo::commands::check::exec
+  12: <cargo::cli::Exec>::exec
+  13: cargo::main
+  14: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  15: std::rt::lang_start::<()>::{closure#0}
+  16: std::rt::lang_start_internal
+  17: _main
+   0.170532083s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint: fingerprint error for backend v0.1.0 (/Users/anuragmishra/Solance/backend)/Check { test: true }/TargetInner { name: "backend", doc: true, ..: with_path("/Users/anuragmishra/Solance/backend/src/main.rs", Edition2024) }
+   0.170535792s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/anuragmishra/Solance/backend/target/debug/.fingerprint/backend-67db959dfe1a5ead/test-bin-backend`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: <std::backtrace::Backtrace>::create
+   1: cargo_util::paths::read_bytes
+   2: cargo_util::paths::read
+   3: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   4: cargo::core::compiler::fingerprint::prepare_target
+   5: cargo::core::compiler::compile
+   6: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   7: cargo::ops::cargo_compile::compile_ws
+   8: cargo::ops::cargo_compile::compile_with_exec
+   9: cargo::ops::cargo_compile::compile
+  10: cargo::commands::check::exec
+  11: <cargo::cli::Exec>::exec
+  12: cargo::main
+  13: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  14: std::rt::lang_start::<()>::{closure#0}
+  15: std::rt::lang_start_internal
+  16: _main
+    Checking tower-http v0.6.11
     Checking backend v0.1.0 (/Users/anuragmishra/Solance/backend)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.72s
+error: could not compile `backend` (bin "backend") due to 1 previous error; 3 warnings emitted
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `backend` (bin "backend" test) due to 1 previous error; 3 warnings emitted

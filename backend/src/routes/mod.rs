@@ -3,3 +3,4 @@ pub mod auth;
 pub mod chats;
 pub mod messages;
 pub mod invoices;
+pub mod user; 
