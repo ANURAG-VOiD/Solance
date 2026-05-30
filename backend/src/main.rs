@@ -52,6 +52,7 @@ async fn main() {
         .nest("/api/auth", routes::auth::router(app_state.clone()))
         .nest("/api/chats", routes::chats::router(app_state.clone()))
         .nest("/api/messages", routes::messages::router(app_state.clone()))
+        .nest("/api/invoices", routes::invoices::router(app_state.clone()))
         .nest("/api/users", routes::user::router())
         .layer(cors)
         .with_state(app_state);

@@ -1,4 +1,5 @@
 use chrono::{DateTime, Utc};
+use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
@@ -28,9 +29,9 @@ pub struct Message {
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct Invoice {
     pub id: Uuid,
-    pub client_id: Uuid,
-    pub freelancer_id: Uuid,
-    pub amount: i64, // Using i64 for BIGINT (can represent lamports)
+    pub sender_wallet: String,
+    pub receiver_wallet: String,
+    pub amount: Decimal,
     pub status: String,
     pub created_at: DateTime<Utc>,
 }

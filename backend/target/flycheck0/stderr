@@ -1,5 +1,5 @@
-   0.115015375s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint: fingerprint error for backend v0.1.0 (/Users/anuragmishra/Solance/backend)/Check { test: false }/TargetInner { name: "backend", doc: true, ..: with_path("/Users/anuragmishra/Solance/backend/src/main.rs", Edition2024) }
-   0.115029708s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/anuragmishra/Solance/backend/target/debug/.fingerprint/backend-b1a3a7418e12b2e7/bin-backend`
+   0.087621917s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint: fingerprint error for backend v0.1.0 (/Users/anuragmishra/Solance/backend)/Check { test: false }/TargetInner { name: "backend", doc: true, ..: with_path("/Users/anuragmishra/Solance/backend/src/main.rs", Edition2024) }
+   0.087639750s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/anuragmishra/Solance/backend/target/debug/.fingerprint/backend-ae31d891699b58a2/bin-backend`
 
 Caused by:
     No such file or directory (os error 2)
@@ -22,8 +22,8 @@ Stack backtrace:
   14: std::rt::lang_start::<()>::{closure#0}
   15: std::rt::lang_start_internal
   16: _main
-   0.169634833s  INFO prepare_target{force=false package_id=tower-http v0.6.11 target="tower_http"}: cargo::core::compiler::fingerprint: fingerprint error for tower-http v0.6.11/Check { test: false }/TargetInner { ..: lib_target("tower_http", ["lib"], "/Users/anuragmishra/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tower-http-0.6.11/src/lib.rs", Edition2018) }
-   0.169660125s  INFO prepare_target{force=false package_id=tower-http v0.6.11 target="tower_http"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/anuragmishra/Solance/backend/target/debug/.fingerprint/tower-http-5d62a7b3c04eb6d1/lib-tower_http`
+   0.096248292s  INFO prepare_target{force=false package_id=sqlx v0.8.6 target="sqlx"}: cargo::core::compiler::fingerprint: fingerprint error for sqlx v0.8.6/Check { test: false }/TargetInner { name_inferred: true, ..: lib_target("sqlx", ["lib"], "/Users/anuragmishra/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.8.6/src/lib.rs", Edition2021) }
+   0.096256917s  INFO prepare_target{force=false package_id=sqlx v0.8.6 target="sqlx"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/anuragmishra/Solance/backend/target/debug/.fingerprint/sqlx-80983838dc98a8c9/lib-sqlx`
 
 Caused by:
     No such file or directory (os error 2)
@@ -47,8 +47,60 @@ Stack backtrace:
   15: std::rt::lang_start::<()>::{closure#0}
   16: std::rt::lang_start_internal
   17: _main
-   0.170532083s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint: fingerprint error for backend v0.1.0 (/Users/anuragmishra/Solance/backend)/Check { test: true }/TargetInner { name: "backend", doc: true, ..: with_path("/Users/anuragmishra/Solance/backend/src/main.rs", Edition2024) }
-   0.170535792s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/anuragmishra/Solance/backend/target/debug/.fingerprint/backend-67db959dfe1a5ead/test-bin-backend`
+   0.096590917s  INFO prepare_target{force=false package_id=sqlx-core v0.8.6 target="sqlx_core"}: cargo::core::compiler::fingerprint: fingerprint error for sqlx-core v0.8.6/Check { test: false }/TargetInner { name_inferred: true, ..: lib_target("sqlx_core", ["lib"], "/Users/anuragmishra/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-core-0.8.6/src/lib.rs", Edition2021) }
+   0.096594375s  INFO prepare_target{force=false package_id=sqlx-core v0.8.6 target="sqlx_core"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/anuragmishra/Solance/backend/target/debug/.fingerprint/sqlx-core-a7199ae221f08b04/lib-sqlx_core`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: <std::backtrace::Backtrace>::create
+   1: cargo_util::paths::read_bytes
+   2: cargo_util::paths::read
+   3: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   4: cargo::core::compiler::fingerprint::prepare_target
+   5: cargo::core::compiler::compile
+   6: cargo::core::compiler::compile
+   7: cargo::core::compiler::compile
+   8: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   9: cargo::ops::cargo_compile::compile_ws
+  10: cargo::ops::cargo_compile::compile_with_exec
+  11: cargo::ops::cargo_compile::compile
+  12: cargo::commands::check::exec
+  13: <cargo::cli::Exec>::exec
+  14: cargo::main
+  15: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  16: std::rt::lang_start::<()>::{closure#0}
+  17: std::rt::lang_start_internal
+  18: _main
+   0.103190292s  INFO prepare_target{force=false package_id=sqlx-postgres v0.8.6 target="sqlx_postgres"}: cargo::core::compiler::fingerprint: fingerprint error for sqlx-postgres v0.8.6/Check { test: false }/TargetInner { name_inferred: true, ..: lib_target("sqlx_postgres", ["lib"], "/Users/anuragmishra/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-postgres-0.8.6/src/lib.rs", Edition2021) }
+   0.103200208s  INFO prepare_target{force=false package_id=sqlx-postgres v0.8.6 target="sqlx_postgres"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/anuragmishra/Solance/backend/target/debug/.fingerprint/sqlx-postgres-5240719fb430c305/lib-sqlx_postgres`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: <std::backtrace::Backtrace>::create
+   1: cargo_util::paths::read_bytes
+   2: cargo_util::paths::read
+   3: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   4: cargo::core::compiler::fingerprint::prepare_target
+   5: cargo::core::compiler::compile
+   6: cargo::core::compiler::compile
+   7: cargo::core::compiler::compile
+   8: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   9: cargo::ops::cargo_compile::compile_ws
+  10: cargo::ops::cargo_compile::compile_with_exec
+  11: cargo::ops::cargo_compile::compile
+  12: cargo::commands::check::exec
+  13: <cargo::cli::Exec>::exec
+  14: cargo::main
+  15: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  16: std::rt::lang_start::<()>::{closure#0}
+  17: std::rt::lang_start_internal
+  18: _main
+   0.104350792s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint: fingerprint error for backend v0.1.0 (/Users/anuragmishra/Solance/backend)/Check { test: true }/TargetInner { name: "backend", doc: true, ..: with_path("/Users/anuragmishra/Solance/backend/src/main.rs", Edition2024) }
+   0.104357208s  INFO prepare_target{force=false package_id=backend v0.1.0 (/Users/anuragmishra/Solance/backend) target="backend"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/anuragmishra/Solance/backend/target/debug/.fingerprint/backend-244520c9bfd5b4fd/test-bin-backend`
 
 Caused by:
     No such file or directory (os error 2)
@@ -71,8 +123,8 @@ Stack backtrace:
   14: std::rt::lang_start::<()>::{closure#0}
   15: std::rt::lang_start_internal
   16: _main
-    Checking tower-http v0.6.11
+    Checking sqlx-core v0.8.6
+    Checking sqlx-postgres v0.8.6
+    Checking sqlx v0.8.6
     Checking backend v0.1.0 (/Users/anuragmishra/Solance/backend)
-error: could not compile `backend` (bin "backend") due to 1 previous error; 3 warnings emitted
-warning: build failed, waiting for other jobs to finish...
-error: could not compile `backend` (bin "backend" test) due to 1 previous error; 3 warnings emitted
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.35s
