@@ -1,5 +1,7 @@
 # Solance
 
+
+
 ## Wallet-Native Freelancing on Solana
 
 Solance is a decentralized freelancer collaboration platform built on Solana, designed to replace traditional accounts with wallet-based identity. Instead of relying on emails, usernames, and centralized authentication systems, users interact with the platform through their Solana wallets, creating a seamless Web3-native freelancing experience.
@@ -148,6 +150,16 @@ Solance is powered by modern technologies including:
 - Solana
 - Wallet Adapter
 - Docker
+
+---
+
+## Deployment
+
+1. Copy `.env.example` to `.env` and fill in all secrets before running.
+2. Start the full stack: `docker compose up --build`
+3. Verify health: `scripts/smoke-test.sh`
+
+For native dev (Postgres in Docker only), see [COMMANDS.md](COMMANDS.md).
 
 ---
 

@@ -5,8 +5,8 @@
 #   docker compose up --build
 #
 # Configuration is supplied via a root `.env` file (copy `.env.example`).
-# Variables use ${VAR:-default} so the stack runs out-of-the-box for local dev
-# while still letting a staging/production host override every value.
+# All secrets (POSTGRES_PASSWORD, JWT_SECRET, etc.) are REQUIRED — the stack
+# will refuse to start if any are missing.
 #
 # NOTE: For dev that only needs Postgres (running backend/frontend natively),
 # the lightweight `infrastructure/docker-compose.yml` still exists and is
@@ -15,25 +15,22 @@
 
 services:
   # --- PostgreSQL ---------------------------------------------------------
+  # Port not exposed — backend reaches DB over the internal compose network
   postgres:
-    image: postgres:16
+    image: postgres:16.3
     container_name: solance-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-solance}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-solance}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB:-solance}
-    ports:
-      # Exposed to the host for debugging (psql / GUI clients). Remove this
-      # mapping on a hardened host to keep the DB private to the compose network.
-      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       # Named volume so data survives `docker compose down` (use `down -v` to wipe).
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
       # Gate dependents on readiness, not just container start, so the backend
       # never races ahead of an unaccepting database.
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-solance} -d ${POSTGRES_DB:-solance}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB:-solance}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -51,11 +48,12 @@ services:
     environment:
       PORT: ${BACKEND_PORT:-8080}
       # Connect over the compose network using the service name `postgres`.
-      DATABASE_URL: postgres://${POSTGRES_USER:-solance}:${POSTGRES_PASSWORD:-solance}@postgres:5432/${POSTGRES_DB:-solance}
-      # MUST be overridden with a strong secret in staging/production.
-      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-in-production}
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-solance}
+      # MUST be overridden with a strong secret (>= 32 chars). The backend
+      # panics at startup if this is missing or too short.
+      JWT_SECRET: ${JWT_SECRET}
       # CORS allow-origin — must match the browser origin of the frontend.
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      FRONTEND_URL: ${FRONTEND_URL}
       RUST_LOG: ${RUST_LOG:-info}
     ports:
       - "${BACKEND_PORT:-8080}:8080"
@@ -68,10 +66,11 @@ services:
       context: ./frontend
       args:
         # NEXT_PUBLIC_* are inlined at BUILD time. NEXT_PUBLIC_API_URL must be
-        # the URL the *browser* uses to reach the backend (e.g. http://localhost:8080
-        # locally, or the public API domain in staging/production) — NOT the
-        # internal `backend` service name.
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+        # the URL the *browser* uses to reach the backend (e.g. the public API
+        # domain in staging/production) — NOT the internal `backend` service
+        # name. The build will fail if this contains "localhost" and
+        # NODE_ENV=production.
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
         NEXT_PUBLIC_SOLANA_RPC_URL: ${NEXT_PUBLIC_SOLANA_RPC_URL:-https://api.devnet.solana.com}
     container_name: solance-frontend
     restart: unless-stopped

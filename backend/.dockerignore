@@ -1,24 +1,6 @@
-# Keep the Docker build context small and the image clean. A large context
-# (e.g. the multi-GB target/ dir) slows every build and can leak local secrets.
-
-# Rust build artifacts — rebuilt inside the image.
-target/
-
-# Local environment / secrets — provided at runtime, never baked into images.
-.env
-.env.*
-
-# VCS / editor / OS noise.
 .git
-.gitignore
-.vscode/
-.idea/
-.DS_Store
-
-# Docker files themselves are not needed inside the build context.
-Dockerfile
-.dockerignore
-
-# Docs / examples are irrelevant to the release binary.
-README.md
-examples/
+.env
+target/
+*.md
+*.log
+.env

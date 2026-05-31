@@ -2,6 +2,8 @@
 .env
 .env.local
 .env.*.local
+backend/.env
+frontend/.env.local
 
 # Rust
 target/
@@ -9,6 +11,14 @@ target/
 # Node.js
 node_modules/
 .next/
+frontend/.next/
+frontend/out/
+out/
+
+# Logs and temp files
+*.log
+*.bak
+*.tmp
 
 # macOS
 .DS_Store
@@ -16,6 +26,3 @@ node_modules/
 # IDEs
 .vscode/
 .idea/
-
-#.md files
-.commands.md
