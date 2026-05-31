@@ -14,6 +14,16 @@ interface HeroSectionProps {
   callbackUrl: string;
 }
 
+/*
+ * Hero centerpiece variant switch.
+ *  - "crystal" (default): the faceted gem render we are currently trialing.
+ *  - "classic": the original product video with the brand mark composited
+ *    onto the floating blue box.
+ * To revert the landing page to the previous hero, set the env var
+ * NEXT_PUBLIC_HERO_VARIANT="classic" (or change this fallback to "classic").
+ */
+const HERO_VARIANT = process.env.NEXT_PUBLIC_HERO_VARIANT ?? "crystal";
+
 // Public landing navigation lives in the floating bottom navbar. Anchors keep
 // first-time visitors on-page; "Docs" is the only external link.
 const NAV_LINKS = [
@@ -92,19 +102,42 @@ export function HeroSection({ callbackUrl }: HeroSectionProps) {
   return (
     <section className="px-4 pt-6 sm:px-6">
       <div className="relative mx-auto flex h-[600px] w-full max-w-[1400px] flex-col overflow-hidden rounded-[48px] border border-slate-200/50 bg-white shadow-[0_40px_100px_-20px_rgba(0,0,0,0.03)]">
-        {/* Background product video. The Solance brand mark is composited
-            directly onto the floating blue box in the asset itself, so the logo
-            stays perfectly locked to the box at every viewport size and pulses
-            with the box's glow. Served locally for fast, CDN-free loading. */}
+        {/* Background hero centerpiece (see HERO_VARIANT above). Both variants
+            fill the same frame so the floating cards/copy positions are shared.
+            The brand mark is baked into each asset, keeping it locked to the
+            box at every viewport size. Assets are served locally (CDN-free). */}
         <div className="pointer-events-none absolute inset-0 z-0 select-none overflow-hidden">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="h-full w-full scale-105 object-cover transition-transform duration-1000"
-            src="/hero-solance.mp4"
-          />
+          {HERO_VARIANT === "classic" ? (
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="h-full w-full scale-105 object-cover transition-transform duration-1000"
+              src="/hero-solance.mp4"
+            />
+          ) : (
+            // Static gem render gets a slow "breathing" zoom for subtle life
+            // (transform-only, GPU-friendly); disabled under reduced motion.
+            <motion.div
+              className="h-full w-full"
+              animate={reduceMotion ? { scale: 1.05 } : { scale: [1.05, 1.09, 1.05] }}
+              transition={
+                reduceMotion
+                  ? undefined
+                  : { duration: 12, repeat: Infinity, ease: "easeInOut" }
+              }
+            >
+              <Image
+                src="/hero-crystal.webp"
+                alt=""
+                fill
+                priority
+                sizes="100vw"
+                className="object-cover object-center"
+              />
+            </motion.div>
+          )}
         </div>
 
         {/* Hero copy + CTAs */}
