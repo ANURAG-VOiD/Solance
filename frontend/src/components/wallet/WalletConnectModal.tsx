@@ -20,7 +20,8 @@ import { createPortal } from "react-dom";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletReadyState } from "@solana/wallet-adapter-base";
 import type { WalletName } from "@solana/wallet-adapter-base";
-import { Shield, Wallet, X } from "lucide-react";
+import Image from "next/image";
+import { Wallet, X } from "lucide-react";
 
 import { useWalletModal } from "@/components/wallet/WalletModalContext";
 
@@ -141,15 +142,18 @@ export function WalletConnectModal() {
         </button>
 
         <div className="px-7 pb-7 pt-8">
-          {/* Branding: shield-S badge + wordmark */}
+          {/* Branding: real shield mark + wordmark. The mark asset is dark navy,
+              so on this dark-glass modal we render it white via brightness-0 +
+              invert (pure white) rather than shipping a separate white asset. */}
           <div className="flex items-center gap-2.5">
-            <span
-              className="flex h-8 w-8 items-center justify-center rounded-xl"
-              style={{ background: "linear-gradient(135deg, #9945ff 0%, #14f195 100%)" }}
-            >
-              <Shield className="h-4 w-4 text-white" strokeWidth={2.5} />
-            </span>
-            <span className="text-sm font-semibold tracking-[0.22em] text-white">
+            <Image
+              src="/solance-logo-clear.webp"
+              alt="Solance"
+              width={36}
+              height={36}
+              className="h-9 w-9 object-contain brightness-0 invert"
+            />
+            <span className="text-base font-semibold tracking-[0.22em] text-white">
               SOLANCE
             </span>
           </div>

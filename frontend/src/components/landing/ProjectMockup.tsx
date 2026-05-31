@@ -1,3 +1,4 @@
+import Image from "next/image";
 import {
   LayoutDashboard,
   Search,
@@ -51,9 +52,13 @@ export function ProjectMockup() {
         {/* Sidebar */}
         <aside className="col-span-3 hidden flex-col border-r border-border p-3 sm:flex">
           <div className="mb-4 flex items-center gap-2 px-1">
-            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-solana text-xs font-bold text-white">
-              S
-            </span>
+            <Image
+              src="/solance-logo-clear.webp"
+              alt="Solance"
+              width={32}
+              height={32}
+              className="h-8 w-8 object-contain"
+            />
             <span className="text-sm font-semibold">Solance</span>
           </div>
           <nav className="space-y-1">

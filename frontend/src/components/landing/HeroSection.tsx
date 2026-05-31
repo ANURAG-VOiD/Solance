@@ -14,16 +14,6 @@ interface HeroSectionProps {
   callbackUrl: string;
 }
 
-/*
- * Hero centerpiece variant switch.
- *  - "crystal" (default): the faceted gem render we are currently trialing.
- *  - "classic": the original product video with the brand mark composited
- *    onto the floating blue box.
- * To revert the landing page to the previous hero, set the env var
- * NEXT_PUBLIC_HERO_VARIANT="classic" (or change this fallback to "classic").
- */
-const HERO_VARIANT = process.env.NEXT_PUBLIC_HERO_VARIANT ?? "crystal";
-
 // Public landing navigation lives in the floating bottom navbar. Anchors keep
 // first-time visitors on-page; "Docs" is the only external link.
 const NAV_LINKS = [
@@ -102,42 +92,19 @@ export function HeroSection({ callbackUrl }: HeroSectionProps) {
   return (
     <section className="px-4 pt-6 sm:px-6">
       <div className="relative mx-auto flex h-[600px] w-full max-w-[1400px] flex-col overflow-hidden rounded-[48px] border border-slate-200/50 bg-white shadow-[0_40px_100px_-20px_rgba(0,0,0,0.03)]">
-        {/* Background hero centerpiece (see HERO_VARIANT above). Both variants
-            fill the same frame so the floating cards/copy positions are shared.
-            The brand mark is baked into each asset, keeping it locked to the
-            box at every viewport size. Assets are served locally (CDN-free). */}
+        {/* Background product video. The Solance brand mark is composited
+            directly onto the floating blue box in the asset itself, so the logo
+            stays perfectly locked to the box at every viewport size and pulses
+            with the box's glow. Served locally for fast, CDN-free loading. */}
         <div className="pointer-events-none absolute inset-0 z-0 select-none overflow-hidden">
-          {HERO_VARIANT === "classic" ? (
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="h-full w-full scale-105 object-cover transition-transform duration-1000"
-              src="/hero-solance.mp4"
-            />
-          ) : (
-            // Static gem render gets a slow "breathing" zoom for subtle life
-            // (transform-only, GPU-friendly); disabled under reduced motion.
-            <motion.div
-              className="h-full w-full"
-              animate={reduceMotion ? { scale: 1.05 } : { scale: [1.05, 1.09, 1.05] }}
-              transition={
-                reduceMotion
-                  ? undefined
-                  : { duration: 12, repeat: Infinity, ease: "easeInOut" }
-              }
-            >
-              <Image
-                src="/hero-crystal.webp"
-                alt=""
-                fill
-                priority
-                sizes="100vw"
-                className="object-cover object-center"
-              />
-            </motion.div>
-          )}
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="h-full w-full scale-105 object-cover transition-transform duration-1000"
+            src="/hero-solance.mp4"
+          />
         </div>
 
         {/* Hero copy + CTAs */}
@@ -148,15 +115,18 @@ export function HeroSection({ callbackUrl }: HeroSectionProps) {
           className="relative z-20 flex flex-1 flex-col items-start px-8 pt-9 md:px-16 md:pt-12"
         >
           {/* Top-left brand lockup (shield mark + wordmark), per design
-              reference. `priority` since it is the first paint above the fold. */}
-          <Link href="/" aria-label="Solance home" className="mb-8 inline-flex md:mb-10">
+              reference. Uses a tightly-cropped asset (no baked-in transparent
+              padding) so the shield's left edge sits flush with the headline
+              "W" and the gap below is controlled purely by the margin.
+              `priority` since it is the first paint above the fold. */}
+          <Link href="/" aria-label="Solance home" className="mb-4 inline-flex md:mb-5">
             <Image
-              src="/solance-clear.webp"
+              src="/solance-lockup.webp"
               alt="Solance"
-              width={1983}
-              height={793}
+              width={1627}
+              height={354}
               priority
-              className="h-9 w-auto md:h-10"
+              className="h-11 w-auto md:h-14"
             />
           </Link>
 
@@ -272,17 +242,17 @@ export function HeroSection({ callbackUrl }: HeroSectionProps) {
             <Link
               href="/"
               aria-label="Solance home"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-100 bg-white shadow-sm"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-100 bg-white shadow-sm"
             >
               {/* Brand mark asset (shield "S"); `priority` avoids a lazy-load
                   flash for this above-the-fold logo. */}
               <Image
                 src="/solance-logo-clear.webp"
                 alt="Solance"
-                width={20}
-                height={20}
+                width={28}
+                height={28}
                 priority
-                className="h-5 w-5 object-contain"
+                className="h-7 w-7 object-contain"
               />
             </Link>
           </motion.div>

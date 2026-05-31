@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   Briefcase,
@@ -104,11 +105,16 @@ export function Sidebar() {
       >
         <div className="flex h-14 items-center justify-between border-b border-border px-4">
           <Link href="/dashboard" className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-brand">
-              <span className="text-sm font-bold text-white">S</span>
-            </div>
+            {/* Real brand mark, sized up for a more prominent identity. */}
+            <Image
+              src="/solance-logo-clear.webp"
+              alt="Solance"
+              width={36}
+              height={36}
+              className="h-12 w-12 object-contain"
+            />
             <div>
-              <p className="text-sm font-semibold">Solance</p>
+              <p className="text-base font-semibold leading-tight">Solance</p>
               <p className="text-[10px] uppercase tracking-wider text-text-muted">Developer OS</p>
             </div>
           </Link>

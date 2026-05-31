@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Menu, ChevronRight } from "lucide-react";
 
 import { DocsSidebar } from "@/components/docs/DocsSidebar";
@@ -42,10 +43,15 @@ export function DocsLayout({ children }: { children: ReactNode }) {
           </button>
 
           <Link href="/" className="flex shrink-0 items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-solana text-sm font-bold text-white">
-              S
-            </span>
-            <span className="hidden text-base font-semibold tracking-tight sm:block">
+            {/* Real brand mark, enlarged for stronger header presence. */}
+            <Image
+              src="/solance-logo-clear.webp"
+              alt="Solance"
+              width={36}
+              height={36}
+              className="h-9 w-9 object-contain"
+            />
+            <span className="hidden text-lg font-semibold tracking-tight sm:block">
               Solance
             </span>
             <span className="hidden rounded-full border border-border px-2 py-0.5 text-[11px] font-medium text-text-muted sm:block">

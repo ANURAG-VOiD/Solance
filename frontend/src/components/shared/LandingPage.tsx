@@ -56,9 +56,9 @@ function LandingContent() {
             <Image
               src="/solance-logo-clear.webp"
               alt="Solance"
-              width={24}
-              height={24}
-              className="h-6 w-6 object-contain"
+              width={32}
+              height={32}
+              className="h-8 w-8 object-contain"
             />
             <p className="text-xs text-text-muted">
               © {new Date().getFullYear()} Solance · Wallet-native workspace
