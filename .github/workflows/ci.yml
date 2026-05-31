@@ -80,8 +80,9 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          # Build-time only; real values are provided at deploy time.
-          NEXT_PUBLIC_API_URL: http://localhost:8080
+          # Production builds reject localhost (see frontend/next.config.ts).
+          # Use a placeholder origin here; real values are set at deploy time.
+          NEXT_PUBLIC_API_URL: https://api.example.com
 
   # Build the production Docker images (build-only, no registry push) so broken
   # Dockerfiles or compose wiring are caught in CI. No secrets are required.
@@ -112,7 +113,7 @@ jobs:
           context: ./frontend
           push: false
           build-args: |
-            NEXT_PUBLIC_API_URL=http://localhost:8080
+            NEXT_PUBLIC_API_URL=https://api.example.com
             NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
           cache-from: type=gha,scope=frontend
           cache-to: type=gha,scope=frontend,mode=max
