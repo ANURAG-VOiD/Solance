@@ -18,14 +18,14 @@
 # ---- Dependencies stage --------------------------------------------------
 # Installs node_modules from the lockfile in isolation so this layer is only
 # rebuilt when package.json / package-lock.json change.
-FROM node:20-bookworm-slim AS deps
+FROM node:24-bookworm-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 # `npm ci` performs a clean, reproducible install from the lockfile.
 RUN npm ci
 
 # ---- Builder stage -------------------------------------------------------
-FROM node:20-bookworm-slim AS builder
+FROM node:24-bookworm-slim AS builder
 WORKDIR /app
 
 # Public API/RPC endpoints are compile-time constants for the browser bundle.
@@ -44,7 +44,7 @@ RUN npm run build
 
 # ---- Runtime stage -------------------------------------------------------
 # Ships only the standalone server output — no dev dependencies, no source.
-FROM node:20-bookworm-slim AS runtime
+FROM node:24-bookworm-slim AS runtime
 WORKDIR /app
 
 ENV NODE_ENV=production
