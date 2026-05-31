@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { Briefcase, FileCheck2, UserPlus, ChevronRight } from "lucide-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { useWalletModal } from "@/components/wallet/WalletModalContext";
 
 import { useAuth, useWalletConnectionStatus } from "@/context/AuthContext";
 
@@ -56,6 +57,10 @@ export function HeroSection({ callbackUrl }: HeroSectionProps) {
   const { connected } = useWalletConnectionStatus();
   const { setVisible } = useWalletModal();
 
+  // Disable looping motion for visitors who request reduced motion (a11y),
+  // mirroring the reduced-motion handling already used by the logo marquee.
+  const reduceMotion = useReducedMotion();
+
   // Destination the visitor intends to reach once authenticated. Both hero CTAs
   // funnel through the same wallet flow but resolve to different routes.
   const [pendingDestination, setPendingDestination] = useState<string | null>(null);
@@ -87,7 +92,10 @@ export function HeroSection({ callbackUrl }: HeroSectionProps) {
   return (
     <section className="px-4 pt-6 sm:px-6">
       <div className="relative mx-auto flex h-[600px] w-full max-w-[1400px] flex-col overflow-hidden rounded-[48px] border border-slate-200/50 bg-white shadow-[0_40px_100px_-20px_rgba(0,0,0,0.03)]">
-        {/* Background product video — no overlays, per design reference. */}
+        {/* Background product video. The Solance brand mark is composited
+            directly onto the floating blue box in the asset itself, so the logo
+            stays perfectly locked to the box at every viewport size and pulses
+            with the box's glow. Served locally for fast, CDN-free loading. */}
         <div className="pointer-events-none absolute inset-0 z-0 select-none overflow-hidden">
           <video
             autoPlay
@@ -95,7 +103,7 @@ export function HeroSection({ callbackUrl }: HeroSectionProps) {
             muted
             playsInline
             className="h-full w-full scale-105 object-cover transition-transform duration-1000"
-            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260505_101331_74f9b798-3f00-4e86-8a01-377aa16ffeaa.mp4"
+            src="/hero-solance.mp4"
           />
         </div>
 
@@ -104,8 +112,21 @@ export function HeroSection({ callbackUrl }: HeroSectionProps) {
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="relative z-20 flex flex-1 flex-col items-start px-8 pt-12 md:px-16 md:pt-16"
+          className="relative z-20 flex flex-1 flex-col items-start px-8 pt-9 md:px-16 md:pt-12"
         >
+          {/* Top-left brand lockup (shield mark + wordmark), per design
+              reference. `priority` since it is the first paint above the fold. */}
+          <Link href="/" aria-label="Solance home" className="mb-8 inline-flex md:mb-10">
+            <Image
+              src="/solance-clear.webp"
+              alt="Solance"
+              width={1983}
+              height={793}
+              priority
+              className="h-9 w-auto md:h-10"
+            />
+          </Link>
+
           <h1 className="font-display text-[42px] font-medium leading-[1.05] tracking-tight text-[#0a1b33] md:text-[56px]">
             Work. Collaborate.
             <br />
@@ -184,13 +205,54 @@ export function HeroSection({ callbackUrl }: HeroSectionProps) {
           className="absolute bottom-10 left-1/2 z-30 flex -translate-x-1/2 items-center gap-1 rounded-full border border-slate-200/40 bg-white/90 px-1.5 py-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.08)] backdrop-blur-2xl"
           aria-label="Primary"
         >
-          <Link
-            href="/"
-            aria-label="Solance home"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-100 bg-white shadow-sm"
+          {/*
+           * Logo mark — a gentle, continuous float paired with a soft glow
+           * pulse gives the brand badge a premium, "alive" presence that fits
+           * the floating hero aesthetic. Both effects are transform/opacity
+           * based (GPU-friendly) and loop infinitely; `isolate` keeps the
+           * blurred halo layered behind the badge without altering layout.
+           */}
+          <motion.div
+            className="relative isolate"
+            animate={reduceMotion ? undefined : { y: [0, -3, 0] }}
+            transition={
+              reduceMotion
+                ? undefined
+                : { duration: 4, repeat: Infinity, ease: "easeInOut" }
+            }
           >
-            <span className="text-sm font-bold text-gradient-solana">S</span>
-          </Link>
+            {/* Soft Solana-gradient halo; pulses via opacity + scale only. */}
+            <motion.span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-gradient-solana blur-md"
+              animate={
+                reduceMotion
+                  ? { opacity: 0.4 }
+                  : { opacity: [0.3, 0.6, 0.3], scale: [0.92, 1.12, 0.92] }
+              }
+              transition={
+                reduceMotion
+                  ? undefined
+                  : { duration: 3.2, repeat: Infinity, ease: "easeInOut" }
+              }
+            />
+            <Link
+              href="/"
+              aria-label="Solance home"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-100 bg-white shadow-sm"
+            >
+              {/* Brand mark asset (shield "S"); `priority` avoids a lazy-load
+                  flash for this above-the-fold logo. */}
+              <Image
+                src="/solance-logo-clear.webp"
+                alt="Solance"
+                width={20}
+                height={20}
+                priority
+                className="h-5 w-5 object-contain"
+              />
+            </Link>
+          </motion.div>
           <div className="hidden items-center gap-1 px-1 sm:flex">
             {NAV_LINKS.map((link) => (
               <a

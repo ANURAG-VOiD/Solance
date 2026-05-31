@@ -151,7 +151,7 @@ export function MessagesWorkspace({ chatId: initialChatId = null }: MessagesWork
           </Card>
           <div className="mb-4">
             <p className="mb-2 flex items-center gap-1 text-xs font-semibold"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> Chat status</p>
-            {["Authenticated", "Messages synced", "Ready to collaborate"].map((m, i) => (
+            {["Authenticated", "Live sync active", "Ready to collaborate"].map((m, i) => (
               <div key={m} className="mb-1 flex items-center gap-2 text-xs text-text-muted">
                 <span className={cn("h-1.5 w-1.5 rounded-full", i < 3 ? "bg-success" : "bg-border")} />{m}
               </div>

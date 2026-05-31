@@ -2,6 +2,12 @@ import type { Bid, Task } from "@/types";
 
 export type InvoicePricingType = "fixed" | "milestone" | "custom";
 
+/**
+ * Drives the invoice workspace: "idle" before anything is started, "project"
+ * when invoicing an accepted job, or "blank" for a from-scratch invoice.
+ */
+export type InvoiceFormMode = "idle" | "project" | "blank";
+
 export interface FreelancerProject {
   taskId: string;
   task: Task;

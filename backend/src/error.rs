@@ -1,4 +1,4 @@
-use axum::{http::StatusCode, Json};
+use axum::{Json, http::StatusCode};
 use serde::Serialize;
 
 /// Standard JSON error body returned by API handlers.

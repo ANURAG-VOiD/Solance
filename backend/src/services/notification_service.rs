@@ -2,8 +2,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::{
-    models::Notification,
-    repositories::notification::NotificationRepository,
+    models::Notification, repositories::notification::NotificationRepository,
     services::realtime_service::RealtimeHub,
 };
 

@@ -62,29 +62,11 @@ body {
   outline-offset: 2px;
 }
 
-/* --- Wallet adapter (light) --- */
-.wallet-adapter-modal-wrapper {
-  background: rgba(15, 23, 42, 0.35) !important;
-  backdrop-filter: blur(8px);
-}
-
-.wallet-adapter-modal-container {
-  background: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 1.5rem !important;
-  color: #0a1b33 !important;
-}
-
-.wallet-adapter-button-trigger {
-  background: var(--color-brand) !important;
-  border-radius: 9999px !important;
-  font-weight: 600 !important;
-  color: #ffffff !important;
-}
-
-.wallet-adapter-button-trigger:hover {
-  background: var(--color-brand-hover) !important;
-}
+/*
+ * The wallet connect modal and trigger button are now fully custom React
+ * components (see components/wallet/*), so the library's default stylesheet and
+ * the previous `.wallet-adapter-*` overrides are no longer needed.
+ */
 
 .sr-only {
   position: absolute;

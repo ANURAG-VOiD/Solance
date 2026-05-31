@@ -3,8 +3,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::{
-    auth::signature::validate_wallet_address,
-    models::Invoice,
+    auth::signature::validate_wallet_address, models::Invoice,
     repositories::invoice::InvoiceRepository,
 };
 

@@ -5,10 +5,10 @@ use uuid::Uuid;
 
 use crate::{
     auth::{
-        jwt::{issue_token, JwtError},
+        jwt::{JwtError, issue_token},
         models::{RequestNonceRequest, RequestNonceResponse, VerifyRequest, VerifyResponse},
         nonce_store::{NonceStore, StoredNonce},
-        signature::{validate_wallet_address, verify_signature, SignatureError},
+        signature::{SignatureError, validate_wallet_address, verify_signature},
     },
     repositories::user::UserRepository,
 };
@@ -46,7 +46,8 @@ impl AuthService {
         store: &NonceStore,
         payload: &RequestNonceRequest,
     ) -> Result<RequestNonceResponse, AuthServiceError> {
-        validate_wallet_address(&payload.wallet_address).map_err(|_| AuthServiceError::InvalidWallet)?;
+        validate_wallet_address(&payload.wallet_address)
+            .map_err(|_| AuthServiceError::InvalidWallet)?;
 
         let nonce_id = Uuid::new_v4();
         let timestamp = Utc::now();
@@ -66,7 +67,10 @@ impl AuthService {
 
         store.upsert(payload.wallet_address.clone(), stored).await;
 
-        Ok(RequestNonceResponse { message, expires_at })
+        Ok(RequestNonceResponse {
+            message,
+            expires_at,
+        })
     }
 
     /// Verify a wallet signature, upsert the user, and issue a JWT.
@@ -76,7 +80,8 @@ impl AuthService {
         jwt_secret: &str,
         payload: &VerifyRequest,
     ) -> Result<VerifyResponse, AuthServiceError> {
-        validate_wallet_address(&payload.wallet_address).map_err(|_| AuthServiceError::InvalidWallet)?;
+        validate_wallet_address(&payload.wallet_address)
+            .map_err(|_| AuthServiceError::InvalidWallet)?;
 
         let stored = store
             .take(&payload.wallet_address)
@@ -150,7 +155,10 @@ mod tests {
         assert!(response.message.contains("Nonce:"));
         assert!(response.expires_at > Utc::now());
 
-        let stored = store.get(&wallet_address).await.expect("nonce should be stored");
+        let stored = store
+            .get(&wallet_address)
+            .await
+            .expect("nonce should be stored");
         assert_eq!(stored.message, response.message);
     }
 
@@ -202,7 +210,8 @@ mod tests {
         let payload = VerifyRequest {
             wallet_address,
             signature: sign_message(&signing_key, &nonce_response.message),
-            message: "Sign in to Solance\nNonce: wrong\nTimestamp: 2026-01-01T00:00:00Z".to_string(),
+            message: "Sign in to Solance\nNonce: wrong\nTimestamp: 2026-01-01T00:00:00Z"
+                .to_string(),
         };
 
         let err = AuthService::verify(&store, &make_dummy_pool(), "secret", &payload)

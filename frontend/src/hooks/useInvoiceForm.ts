@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 
 import { useAuth } from "@/context/AuthContext";
+import { fetchUserByWallet } from "@/services/users.service";
 import {
   defaultDueDate,
   generateInvoiceNumber,
@@ -15,6 +16,7 @@ import type {
   InvoiceDetailsDraft,
   InvoiceDraftMeta,
   InvoiceFormErrors,
+  InvoiceFormMode,
   InvoicePricingType,
 } from "@/types/invoice";
 
@@ -45,6 +47,17 @@ function emptyDetails(): InvoiceDetailsDraft {
   };
 }
 
+/**
+ * Blank invoices have no agreed project amount, so they default to the "custom"
+ * pricing type with an empty, user-entered amount.
+ */
+function blankDetails(): InvoiceDetailsDraft {
+  return {
+    ...emptyDetails(),
+    pricingType: "custom",
+  };
+}
+
 function clientFromProject(project: FreelancerProject): InvoiceClientDraft {
   return {
     name: truncateWallet(project.clientWallet, 6),
@@ -66,6 +79,9 @@ function detailsFromProject(project: FreelancerProject): InvoiceDetailsDraft {
 
 export function useInvoiceForm() {
   const { user } = useAuth();
+  // "idle" → nothing started; "project" → invoicing an accepted job;
+  // "blank" → a from-scratch invoice with manually entered details.
+  const [mode, setMode] = useState<InvoiceFormMode>("idle");
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [client, setClient] = useState<InvoiceClientDraft>(emptyClient());
   const [details, setDetails] = useState<InvoiceDetailsDraft>(emptyDetails());
@@ -75,15 +91,48 @@ export function useInvoiceForm() {
     (project: FreelancerProject | null) => {
       if (!project) {
         setSelectedProjectId(null);
+        setMode("idle");
         return;
       }
+      setMode("project");
       setSelectedProjectId(project.taskId);
-      setClient(clientFromProject(project));
+      const baseClient = clientFromProject(project);
+      setClient(baseClient);
       setDetails(detailsFromProject(project));
       setErrors({});
+
+      // Enrich the auto-filled client name with their on-chain profile title.
+      // Falls back silently to the truncated wallet when the client has no
+      // profile (404) or the lookup fails.
+      void fetchUserByWallet(project.clientWallet)
+        .then((clientUser) => {
+          const title = clientUser?.title?.trim();
+          if (!title) return;
+          setClient((prev) =>
+            // Only replace the auto-filled placeholder — never a name the user
+            // has manually edited — and only if this is still the same client.
+            prev.walletAddress === project.clientWallet &&
+            prev.name === baseClient.name
+              ? { ...prev, name: title }
+              : prev,
+          );
+        })
+        .catch(() => {
+          // Keep the truncated-wallet fallback on any lookup error.
+        });
     },
     [],
   );
+
+  // Start a blank, from-scratch invoice: clears any selected project and resets
+  // to empty client + details so the user can fill everything in manually.
+  const startBlank = useCallback(() => {
+    setMode("blank");
+    setSelectedProjectId(null);
+    setClient(emptyClient());
+    setDetails(blankDetails());
+    setErrors({});
+  }, []);
 
   const updateClient = useCallback((patch: Partial<InvoiceClientDraft>) => {
     setClient((prev) => ({ ...prev, ...patch }));
@@ -149,7 +198,10 @@ export function useInvoiceForm() {
 
   const validate = useCallback((): boolean => {
     const next: InvoiceFormErrors = {};
-    if (!selectedProjectId) next.project = "Select a project to continue";
+    // A project is only required in project mode; blank invoices need none.
+    if (mode === "project" && !selectedProjectId) {
+      next.project = "Select a project to continue";
+    }
     const amount = parseFloat(details.amount);
     if (!details.amount.trim() || Number.isNaN(amount) || amount <= 0) {
       next.amount = "Enter a valid amount greater than zero";
@@ -162,9 +214,10 @@ export function useInvoiceForm() {
     }
     setErrors(next);
     return Object.keys(next).length === 0;
-  }, [selectedProjectId, details, client.walletAddress]);
+  }, [mode, selectedProjectId, details, client.walletAddress]);
 
   const resetForm = useCallback(() => {
+    setMode("idle");
     setSelectedProjectId(null);
     setClient(emptyClient());
     setDetails(emptyDetails());
@@ -172,12 +225,14 @@ export function useInvoiceForm() {
   }, []);
 
   return {
+    mode,
     selectedProjectId,
     client,
     details,
     errors,
     calculations,
     selectProject,
+    startBlank,
     updateClient,
     updateDetails,
     setPricingType,

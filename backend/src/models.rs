@@ -31,7 +31,9 @@ pub struct Chat {
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Serialize, Deserialize, FromRow)]
+// `Clone` lets the create-message handler hand one copy to the realtime hub
+// (broadcast to the recipient) while returning another in the HTTP response.
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct Message {
     pub id: Uuid,
     pub chat_id: Uuid,

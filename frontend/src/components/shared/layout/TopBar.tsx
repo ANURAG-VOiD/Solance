@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import dynamic from "next/dynamic";
 import { Bell } from "lucide-react";
 
 import { useAuth, useWalletConnectionStatus } from "@/context/AuthContext";
@@ -12,12 +11,7 @@ import { NotificationItem } from "@/components/shared/NotificationItem";
 import { Button } from "@/components/shared/ui/Button";
 import { ErrorState } from "@/components/shared/states/ErrorState";
 import { LoadingState } from "@/components/shared/states/LoadingState";
-
-const WalletMultiButton = dynamic(
-  async () =>
-    (await import("@solana/wallet-adapter-react-ui")).WalletMultiButton,
-  { ssr: false },
-);
+import { WalletButton } from "@/components/wallet/WalletButton";
 
 export function TopBar() {
   const { isAuthenticated, isSigningIn, signIn, signOut } = useAuth();
@@ -131,7 +125,7 @@ export function TopBar() {
           </div>
         )}
 
-        <WalletMultiButton className="!h-9 !max-w-[8.5rem] !overflow-hidden !rounded-md !text-sm !text-ellipsis !whitespace-nowrap sm:!max-w-none" />
+        <WalletButton className="max-w-[8.5rem] sm:max-w-none" />
 
         {connected && !isAuthenticated && (
           <Button size="sm" onClick={() => signIn("/dashboard")} disabled={isSigningIn}>

@@ -21,6 +21,8 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: "Solance",
   description: "Wallet-native freelancer collaboration on Solana",
+  // Use the uploaded brand mark as the favicon / tab icon.
+  icons: { icon: "/favicon.webp", shortcut: "/favicon.webp", apple: "/favicon.webp" },
 };
 
 export default function RootLayout({

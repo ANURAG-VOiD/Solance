@@ -44,7 +44,12 @@ impl MessageService {
         }
 
         let chat_repo = ChatRepository::new(pool.clone());
-        if chat_repo.get_by_id(input.chat_id).await.map_err(|_| MessageServiceError::Internal)?.is_none() {
+        if chat_repo
+            .get_by_id(input.chat_id)
+            .await
+            .map_err(|_| MessageServiceError::Internal)?
+            .is_none()
+        {
             return Err(MessageServiceError::ChatNotFound);
         }
 
@@ -59,7 +64,12 @@ impl MessageService {
         chat_id: Uuid,
     ) -> Result<Vec<Message>, MessageServiceError> {
         let chat_repo = ChatRepository::new(pool.clone());
-        if chat_repo.get_by_id(chat_id).await.map_err(|_| MessageServiceError::Internal)?.is_none() {
+        if chat_repo
+            .get_by_id(chat_id)
+            .await
+            .map_err(|_| MessageServiceError::Internal)?
+            .is_none()
+        {
             return Err(MessageServiceError::ChatNotFound);
         }
 

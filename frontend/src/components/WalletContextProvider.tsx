@@ -11,12 +11,12 @@ import {
   PhantomWalletAdapter,
   SolflareWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
-import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { clusterApiUrl } from "@solana/web3.js";
 
 import { AuthProvider } from "@/context/AuthContext";
-
-import "@solana/wallet-adapter-react-ui/styles.css";
+// Solance owns the connect modal UI; we no longer use the library's modal
+// provider or its default stylesheet (see WalletModalContext / WalletConnectModal).
+import { SolanceWalletModalProvider } from "@/components/wallet/WalletModalContext";
 
 interface Props {
   children: ReactNode;
@@ -48,9 +48,9 @@ export const WalletContextProvider: FC<Props> = ({ children }) => {
   return (
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect={autoConnect} onError={onError}>
-        <WalletModalProvider>
+        <SolanceWalletModalProvider>
           <AuthProvider>{children}</AuthProvider>
-        </WalletModalProvider>
+        </SolanceWalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
   );

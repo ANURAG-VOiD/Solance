@@ -8,6 +8,7 @@ import { Textarea } from "@/components/shared/ui/Textarea";
 import { Badge } from "@/components/shared/ui/Badge";
 import { formatSol, formatTimestamp } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { INVOICE_CURRENCY_OPTIONS } from "@/lib/solana-tokens";
 
 interface InvoiceDetailsSectionProps {
   project: FreelancerProject | null;
@@ -57,31 +58,35 @@ export function InvoiceDetailsSection({
         </div>
       )}
 
-      <div className="mb-4">
-        <p className="mb-2 text-xs font-medium uppercase tracking-wider text-text-muted">
-          Invoice type
-        </p>
-        <div className="grid gap-2 sm:grid-cols-3">
-          {PRICING_TYPES.map(({ id, label, desc }) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => onPricingTypeChange(id)}
-              className={cn(
-                "rounded-md border px-3 py-2 text-left text-xs transition-colors",
-                details.pricingType === id
-                  ? "border-brand bg-brand/10 text-brand"
-                  : "border-border hover:bg-surface-hover",
-              )}
-            >
-              <p className="font-medium">{label}</p>
-              <p className="mt-0.5 text-text-muted">{desc}</p>
-            </button>
-          ))}
+      {/* Project-derived pricing (fixed / milestone) only applies when invoicing
+          an accepted job. Blank invoices enter the amount directly below. */}
+      {project && (
+        <div className="mb-4">
+          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-text-muted">
+            Invoice type
+          </p>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {PRICING_TYPES.map(({ id, label, desc }) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => onPricingTypeChange(id)}
+                className={cn(
+                  "rounded-md border px-3 py-2 text-left text-xs transition-colors",
+                  details.pricingType === id
+                    ? "border-brand bg-brand/10 text-brand"
+                    : "border-border hover:bg-surface-hover",
+                )}
+              >
+                <p className="font-medium">{label}</p>
+                <p className="mt-0.5 text-text-muted">{desc}</p>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      {details.pricingType === "milestone" && (
+      {project && details.pricingType === "milestone" && (
         <div className="mb-4 flex flex-wrap gap-2">
           {MILESTONES.map((pct) => (
             <button
@@ -103,11 +108,29 @@ export function InvoiceDetailsSection({
           value={details.invoiceNumber}
           onChange={(e) => onChange({ invoiceNumber: e.target.value })}
         />
-        <Input
-          label="Currency"
-          value={details.currency}
-          onChange={(e) => onChange({ currency: e.target.value })}
-        />
+        {/* Currency is recorded as a symbol only. The actual on-chain mint is
+            resolved from the payer's wallet holdings at payment time, since the
+            payer may differ from the freelancer authoring this invoice. */}
+        <div className="space-y-1.5">
+          <label
+            htmlFor="invoice-currency"
+            className="block text-sm font-medium text-text"
+          >
+            Currency
+          </label>
+          <select
+            id="invoice-currency"
+            value={details.currency}
+            onChange={(e) => onChange({ currency: e.target.value })}
+            className="h-9 w-full rounded-md border border-border bg-void px-3 text-sm text-text focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+          >
+            {INVOICE_CURRENCY_OPTIONS.map((symbol) => (
+              <option key={symbol} value={symbol}>
+                {symbol}
+              </option>
+            ))}
+          </select>
+        </div>
         <Input
           label="Issue date"
           type="date"

@@ -1,11 +1,11 @@
-pub mod health;
 pub mod auth;
-pub mod chats;
-pub mod messages;
-pub mod invoices;
-pub mod user;
-pub mod tasks;
 pub mod bids;
+pub mod chats;
 pub mod dashboard;
+pub mod health;
+pub mod invoices;
+pub mod messages;
 pub mod notifications;
+pub mod tasks;
+pub mod user;
 pub mod ws;

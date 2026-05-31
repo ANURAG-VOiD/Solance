@@ -48,20 +48,22 @@ export function InvoicePreviewPanel({
 
       <div className="space-y-6 px-6 py-5 text-sm">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <div>
+          <div className="min-w-0">
             <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-text-muted">
               From
             </p>
-            <p className="font-medium">{freelancerName || "Freelancer"}</p>
+            {/* Names may be a full base58 wallet (no profile title yet); break
+                long unbroken strings so they wrap instead of overlapping. */}
+            <p className="break-all font-medium">{freelancerName || "Freelancer"}</p>
             <p className="mt-0.5 font-mono text-xs text-text-muted">
               {truncateWallet(freelancerWallet, 8)}
             </p>
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-text-muted">
               Bill to
             </p>
-            <p className="font-medium">{client.name || "Client"}</p>
+            <p className="break-all font-medium">{client.name || "Client"}</p>
             {client.companyName && (
               <p className="text-text-muted">{client.companyName}</p>
             )}

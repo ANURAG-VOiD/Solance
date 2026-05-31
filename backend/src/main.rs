@@ -2,20 +2,20 @@ pub mod models;
 
 mod auth;
 mod config;
-mod state;
+mod db;
 mod error;
+mod repositories;
 mod routes;
 mod services;
-mod repositories;
-mod db;
+mod state;
 
-use axum::http::{header, HeaderValue, Method};
+use auth::nonce_store::NonceStore;
 use axum::Router;
+use axum::http::{HeaderValue, Method, header};
 use config::Config;
 use db::create_pool;
 use services::realtime_service::RealtimeHub;
 use state::AppState;
-use auth::nonce_store::NonceStore;
 use std::sync::Arc;
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
@@ -59,19 +59,21 @@ async fn main() {
         .nest("/api/tasks", routes::tasks::router(app_state.clone()))
         .nest("/api/bids", routes::bids::router(app_state.clone()))
         .nest("/api/users", routes::user::router(app_state.clone()))
-        .nest("/api/dashboard", routes::dashboard::router(app_state.clone()))
-        .nest("/api/notifications", routes::notifications::router(app_state.clone()))
+        .nest(
+            "/api/dashboard",
+            routes::dashboard::router(app_state.clone()),
+        )
+        .nest(
+            "/api/notifications",
+            routes::notifications::router(app_state.clone()),
+        )
         .nest("/api/ws", routes::ws::router(app_state.clone()))
         .layer(cors)
         .with_state(app_state);
 
-    let listener = TcpListener::bind(&addr)
-        .await
-        .expect("Failed to bind port");
+    let listener = TcpListener::bind(&addr).await.expect("Failed to bind port");
 
     println!("Solance backend running on http://{}", addr);
 
-    axum::serve(listener, app)
-        .await
-        .expect("Server failed");
+    axum::serve(listener, app).await.expect("Server failed");
 }

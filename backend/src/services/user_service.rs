@@ -25,6 +25,14 @@ impl std::error::Error for UserServiceError {}
 pub struct UserService;
 
 impl UserService {
+    /// Lists freelancers that have completed a public profile, capped at `limit`.
+    pub async fn list_talent(pool: &PgPool, limit: i64) -> Result<Vec<User>, UserServiceError> {
+        UserRepository::new(pool.clone())
+            .list_with_profiles(limit)
+            .await
+            .map_err(|_| UserServiceError::Internal)
+    }
+
     pub async fn update_profile(
         pool: &PgPool,
         wallet_address: &str,

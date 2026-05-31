@@ -1,10 +1,10 @@
 pub mod auth_service;
-pub mod chat_service;
-pub mod message_service;
-pub mod invoice_service;
-pub mod task_service;
 pub mod bid_service;
-pub mod user_service;
-pub mod notification_service;
+pub mod chat_service;
 pub mod dashboard_service;
+pub mod invoice_service;
+pub mod message_service;
+pub mod notification_service;
 pub mod realtime_service;
+pub mod task_service;
+pub mod user_service;

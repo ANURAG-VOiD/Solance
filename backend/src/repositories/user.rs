@@ -64,6 +64,24 @@ impl UserRepository {
         .await
     }
 
+    /// Returns users who have published a public profile (i.e. set a title),
+    /// most recently joined first. Powers the landing-page "featured talent"
+    /// section so it reflects real freelancers instead of static cards.
+    pub async fn list_with_profiles(&self, limit: i64) -> Result<Vec<User>, sqlx::Error> {
+        sqlx::query_as::<_, User>(
+            r#"
+            SELECT id, wallet_address, title, bio, skills, avatar_cid, created_at
+            FROM users
+            WHERE title IS NOT NULL AND btrim(title) <> ''
+            ORDER BY created_at DESC
+            LIMIT $1
+            "#,
+        )
+        .bind(limit)
+        .fetch_all(&self.pool)
+        .await
+    }
+
     /// Updates Web3 profile fields for the wallet owner.
     pub async fn update_profile(
         &self,

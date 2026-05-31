@@ -1,9 +1,6 @@
 use sqlx::PgPool;
 
-use crate::{
-    models::Chat,
-    repositories::chat::ChatRepository,
-};
+use crate::{models::Chat, repositories::chat::ChatRepository};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ChatServiceError {

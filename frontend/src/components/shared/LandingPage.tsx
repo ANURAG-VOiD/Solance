@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Suspense, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 
@@ -51,9 +52,14 @@ function LandingContent() {
       <footer className="border-t border-border py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 sm:flex-row">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-solana">
-              <span className="text-[10px] font-bold text-white">S</span>
-            </div>
+            {/* Footer brand mark — real logo asset replaces the placeholder. */}
+            <Image
+              src="/solance-logo-clear.webp"
+              alt="Solance"
+              width={24}
+              height={24}
+              className="h-6 w-6 object-contain"
+            />
             <p className="text-xs text-text-muted">
               © {new Date().getFullYear()} Solance · Wallet-native workspace
             </p>

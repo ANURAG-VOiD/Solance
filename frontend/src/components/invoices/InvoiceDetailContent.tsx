@@ -29,22 +29,14 @@ function computeTotals(amount: string, taxPercent: string, discountPercent: stri
 export function InvoiceDetailContent({ invoiceId }: { invoiceId: string }) {
   const query = useAsyncData(() => getInvoice(invoiceId), [invoiceId]);
   const [invoiceOverride, setInvoiceOverride] = useState<Invoice | null>(null);
-  const [payError, setPayError] = useState<string | null>(null);
-  const [paying, setPaying] = useState(false);
   const invoice = invoiceOverride ?? query.data;
 
-  const handlePay = async () => {
+  // Persist the paid state once the on-chain transfer has confirmed. The
+  // Solana transaction itself is executed inside `SolanaPaymentSection`.
+  const handlePaid = async () => {
     if (!invoice) return;
-    setPaying(true);
-    setPayError(null);
-    try {
-      const updated = await updateInvoiceStatus(invoice.id, "paid");
-      setInvoiceOverride(updated);
-    } catch (err) {
-      setPayError(err instanceof Error ? err.message : "Payment failed");
-    } finally {
-      setPaying(false);
-    }
+    const updated = await updateInvoiceStatus(invoice.id, "paid");
+    setInvoiceOverride(updated);
   };
 
   if (query.isLoading) return <LoadingState />;
@@ -132,16 +124,9 @@ export function InvoiceDetailContent({ invoiceId }: { invoiceId: string }) {
             freelancerWallet={invoice.sender_wallet}
             amount={calculations.total.toFixed(4)}
             currency={details.currency}
+            payable={invoice.status === "pending"}
+            onPaid={handlePaid}
           />
-
-          {invoice.status === "pending" && (
-            <>
-              <Button onClick={handlePay} disabled={paying} className="w-full sm:w-auto" size="lg">
-                {paying ? "Processing on-chain…" : "Pay with Solana"}
-              </Button>
-              {payError && <p role="alert" className="text-sm text-danger">{payError}</p>}
-            </>
-          )}
         </div>
 
         <div className="xl:col-span-5">

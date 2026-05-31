@@ -5,6 +5,7 @@ export { useMyApplications } from "@/hooks/useApplications";
 export { useMyPostedJobs } from "@/hooks/useMyJobs";
 export { useChats } from "@/hooks/useChats";
 export { useMessages } from "@/hooks/useMessages";
+export { useReconnectingWebSocket } from "@/hooks/useReconnectingWebSocket";
 export { useInvoices } from "@/hooks/useInvoices";
 export { useDashboardStats } from "@/hooks/useDashboardStats";
 export { useNotifications } from "@/hooks/useNotifications";

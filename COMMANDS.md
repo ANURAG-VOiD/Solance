@@ -582,3 +582,116 @@ curl -s -X PATCH http://localhost:8080/api/invoices/<INVOICE_UUID> \
 | **Chats** | Create chat, select chat |
 | **Messages** | View thread, send message |
 | **Invoices** | Create invoice, mark as paid |
+
+---
+
+## Deployment (Docker / staging / production)
+
+The whole stack — Postgres, the Rust/Axum backend, and the Next.js frontend —
+is containerised and orchestrated by the root **`docker-compose.yml`**. This is
+the reproducible path for staging/production hosts and for running the full app
+locally without installing Rust or Node.
+
+> The lightweight `infrastructure/docker-compose.yml` (Postgres only) is still
+> available for the native dev workflow described above. The **root**
+> `docker-compose.yml` is the complete containerised stack.
+
+### Files
+
+| File | Purpose |
+|------|---------|
+| `docker-compose.yml` (root) | Full stack: `postgres` + `backend` + `frontend` |
+| `backend/Dockerfile` | Multi-stage Rust build (cargo-chef cached), slim non-root runtime |
+| `frontend/Dockerfile` | Multi-stage Next.js `standalone` build, non-root runtime |
+| `.env.example` (root) | Template for all compose variables |
+| `backend/.dockerignore`, `frontend/.dockerignore` | Keep build contexts small |
+
+### One-time setup
+
+**Where:** repo root
+
+```bash
+cp .env.example .env
+# Edit .env — at minimum set a strong JWT_SECRET for anything non-local:
+#   openssl rand -hex 32
+```
+
+### Bring the stack up
+
+**Where:** repo root
+
+```bash
+docker compose up --build          # build images + start all services
+docker compose up -d --build       # ... detached
+```
+
+- Frontend: http://localhost:3000
+- Backend:  http://localhost:8080  (health: `curl http://localhost:8080/api/health/`)
+- Postgres: `localhost:5432`
+
+### Stop / clean up
+
+```bash
+docker compose down        # stop containers (Postgres data volume is kept)
+docker compose down -v     # also delete the database volume (wipes data)
+```
+
+### Validate config without starting
+
+```bash
+docker compose config      # renders the fully-resolved compose file
+```
+
+### Environment variables
+
+All variables live in the root `.env` (see `.env.example`). They map to services
+as follows:
+
+| Variable | Service | Required | Default | Notes |
+|----------|---------|----------|---------|-------|
+| `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | postgres | recommended | `solance` | DB credentials |
+| `POSTGRES_PORT` | postgres | no | `5432` | Host-side port mapping (debug only) |
+| `BACKEND_PORT` | backend | no | `8080` | Host + container API port |
+| `JWT_SECRET` | backend | **yes (prod)** | `dev-secret-change-in-production` | Session JWT signing key — override in prod |
+| `FRONTEND_URL` | backend | no | `http://localhost:3000` | CORS allow-origin; must match the browser origin |
+| `RUST_LOG` | backend | no | `info` | Log level |
+| `FRONTEND_PORT` | frontend | no | `3000` | Host-side port mapping |
+| `NEXT_PUBLIC_API_URL` | frontend | **yes (prod)** | `http://localhost:8080` | **Build-time** — public backend URL the browser hits |
+| `NEXT_PUBLIC_SOLANA_RPC_URL` | frontend | no | `https://api.devnet.solana.com` | **Build-time** — Solana JSON-RPC endpoint |
+
+> `DATABASE_URL` for the backend is assembled automatically by compose from the
+> `POSTGRES_*` values and the internal `postgres` hostname — you do not set it.
+
+> **Build-time vs runtime:** `NEXT_PUBLIC_*` values are inlined into the browser
+> bundle when the frontend image is **built**. Changing them requires
+> `docker compose build frontend` (or `up --build`), not just a restart. On a
+> real host, `NEXT_PUBLIC_API_URL` must be the **public** backend URL (e.g.
+> `https://api.your-domain.com`), not the internal `backend` service name.
+
+### Database migrations
+
+Migrations are **embedded into the backend binary** at compile time
+(`sqlx::migrate!`) and run **automatically on startup** against `DATABASE_URL`.
+No manual step is needed — the backend waits for Postgres to pass its
+healthcheck (compose `depends_on: condition: service_healthy`) and then applies
+any pending migrations before serving traffic.
+
+### Staging / production notes
+
+- **Secrets:** never use the placeholder `JWT_SECRET`. Inject real secrets via
+  the host's secret manager / environment, not a committed `.env`.
+- **Postgres:** for production prefer a managed Postgres instance. Point
+  `DATABASE_URL` at it (sqlx uses rustls, so TLS-required databases work; the
+  image ships CA certificates). Drop the `postgres` service / host port mapping
+  if you are not self-hosting the DB.
+- **TLS / domains:** terminate HTTPS at a reverse proxy or load balancer in
+  front of the `frontend` (3000) and `backend` (8080) services, and set
+  `FRONTEND_URL` + `NEXT_PUBLIC_API_URL` to the public HTTPS origins.
+- **Rebuild a single service:** `docker compose build backend` /
+  `docker compose build frontend`.
+
+### CI image builds
+
+The CI workflow (`.github/workflows/ci.yml`) includes a **build-only** Docker
+job that validates `docker compose config` and builds both images (no registry
+push, no secrets) so Dockerfile/compose breakage is caught on every PR.

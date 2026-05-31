@@ -1,16 +1,16 @@
 use axum::{
+    Json, Router,
     extract::{Path, State},
     http::StatusCode,
     middleware,
     routing::{get, post},
-    Json, Router,
 };
 use std::sync::Arc;
 use uuid::Uuid;
 
 use crate::{
-    auth::{middleware::require_auth, AuthUser},
-    error::{api_error, ApiError},
+    auth::{AuthUser, middleware::require_auth},
+    error::{ApiError, api_error},
     models::{Bid, CreateBidRequest, CreateTaskRequest, Task},
     services::{
         bid_service::{BidService, BidServiceError},
@@ -38,49 +38,56 @@ async fn create_task(
     State(state): State<Arc<AppState>>,
     auth: AuthUser,
     Json(payload): Json<CreateTaskRequest>,
-) -> Result<(StatusCode, Json<Task>), StatusCode> {
+) -> Result<(StatusCode, Json<Task>), ApiError> {
     match TaskService::create_task(&state.db, &auth.wallet, payload).await {
         Ok(task) => Ok((StatusCode::CREATED, Json(task))),
         Err(
-            TaskServiceError::InvalidTitle
+            e @ (TaskServiceError::InvalidTitle
             | TaskServiceError::InvalidDescription
-            | TaskServiceError::InvalidBudget,
-        ) => Err(StatusCode::BAD_REQUEST),
-        Err(TaskServiceError::Internal) => Err(StatusCode::INTERNAL_SERVER_ERROR),
-        Err(TaskServiceError::NotFound) => Err(StatusCode::NOT_FOUND),
+            | TaskServiceError::InvalidBudget),
+        ) => Err(api_error(StatusCode::BAD_REQUEST, e.to_string())),
+        Err(TaskServiceError::NotFound) => Err(api_error(StatusCode::NOT_FOUND, "Task not found")),
+        Err(TaskServiceError::Internal) => Err(api_error(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Failed to create job",
+        )),
     }
 }
 
 async fn list_my_tasks(
     State(state): State<Arc<AppState>>,
     auth: AuthUser,
-) -> Result<Json<Vec<Task>>, StatusCode> {
+) -> Result<Json<Vec<Task>>, ApiError> {
     match TaskService::list_my_tasks(&state.db, &auth.wallet).await {
         Ok(tasks) => Ok(Json(tasks)),
-        Err(TaskServiceError::Internal) => Err(StatusCode::INTERNAL_SERVER_ERROR),
-        Err(_) => Err(StatusCode::BAD_REQUEST),
+        Err(_) => Err(api_error(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Failed to load your jobs",
+        )),
     }
 }
 
-async fn list_open_tasks(
-    State(state): State<Arc<AppState>>,
-) -> Result<Json<Vec<Task>>, StatusCode> {
+async fn list_open_tasks(State(state): State<Arc<AppState>>) -> Result<Json<Vec<Task>>, ApiError> {
     match TaskService::list_open_tasks(&state.db).await {
         Ok(tasks) => Ok(Json(tasks)),
-        Err(TaskServiceError::Internal) => Err(StatusCode::INTERNAL_SERVER_ERROR),
-        Err(_) => Err(StatusCode::BAD_REQUEST),
+        Err(_) => Err(api_error(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Failed to load open jobs",
+        )),
     }
 }
 
 async fn get_task(
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
-) -> Result<Json<Task>, StatusCode> {
+) -> Result<Json<Task>, ApiError> {
     match TaskService::get_task(&state.db, id).await {
         Ok(task) => Ok(Json(task)),
-        Err(TaskServiceError::NotFound) => Err(StatusCode::NOT_FOUND),
-        Err(TaskServiceError::Internal) => Err(StatusCode::INTERNAL_SERVER_ERROR),
-        Err(_) => Err(StatusCode::BAD_REQUEST),
+        Err(TaskServiceError::NotFound) => Err(api_error(StatusCode::NOT_FOUND, "Task not found")),
+        Err(_) => Err(api_error(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Failed to load job",
+        )),
     }
 }
 
@@ -114,24 +121,25 @@ async fn create_bid(
             | BidServiceError::SameWallet
             | BidServiceError::TaskNotOpen),
         ) => Err(api_error(StatusCode::BAD_REQUEST, e.to_string())),
-        Err(BidServiceError::TaskNotFound) => {
-            Err(api_error(StatusCode::NOT_FOUND, BidServiceError::TaskNotFound.to_string()))
-        }
-        Err(BidServiceError::DuplicateBid) => {
-            Err(api_error(StatusCode::CONFLICT, BidServiceError::DuplicateBid.to_string()))
-        }
-        Err(BidServiceError::Internal) => {
-            Err(api_error(
-                StatusCode::INTERNAL_SERVER_ERROR,
-                BidServiceError::Internal.to_string(),
-            ))
-        }
+        Err(BidServiceError::TaskNotFound) => Err(api_error(
+            StatusCode::NOT_FOUND,
+            BidServiceError::TaskNotFound.to_string(),
+        )),
+        Err(BidServiceError::DuplicateBid) => Err(api_error(
+            StatusCode::CONFLICT,
+            BidServiceError::DuplicateBid.to_string(),
+        )),
+        Err(BidServiceError::Internal) => Err(api_error(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            BidServiceError::Internal.to_string(),
+        )),
         Err(e @ (BidServiceError::Forbidden | BidServiceError::NotFound)) => {
             Err(api_error(StatusCode::FORBIDDEN, e.to_string()))
         }
-        Err(BidServiceError::BidStateConflict) => {
-            Err(api_error(StatusCode::CONFLICT, BidServiceError::BidStateConflict.to_string()))
-        }
+        Err(BidServiceError::BidStateConflict) => Err(api_error(
+            StatusCode::CONFLICT,
+            BidServiceError::BidStateConflict.to_string(),
+        )),
     }
 }
 
@@ -139,12 +147,19 @@ async fn list_bids(
     State(state): State<Arc<AppState>>,
     auth: AuthUser,
     Path(task_id): Path<Uuid>,
-) -> Result<Json<Vec<Bid>>, StatusCode> {
+) -> Result<Json<Vec<Bid>>, ApiError> {
     match BidService::list_bids_for_task(&state.db, task_id, &auth.wallet).await {
         Ok(bids) => Ok(Json(bids)),
-        Err(BidServiceError::TaskNotFound) => Err(StatusCode::NOT_FOUND),
-        Err(BidServiceError::Forbidden) => Err(StatusCode::FORBIDDEN),
-        Err(BidServiceError::Internal) => Err(StatusCode::INTERNAL_SERVER_ERROR),
-        Err(_) => Err(StatusCode::BAD_REQUEST),
+        Err(BidServiceError::TaskNotFound) => {
+            Err(api_error(StatusCode::NOT_FOUND, "Task not found"))
+        }
+        Err(BidServiceError::Forbidden) => Err(api_error(
+            StatusCode::FORBIDDEN,
+            "Only the job owner can view applicants",
+        )),
+        Err(_) => Err(api_error(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Failed to load applicants",
+        )),
     }
 }

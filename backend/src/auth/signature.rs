@@ -65,10 +65,9 @@ fn decode_signature(signature_base58: &str) -> Result<Signature, SignatureError>
         .into_vec()
         .map_err(|e| SignatureError::InvalidSignatureEncoding(e.to_string()))?;
 
-    let sig_array: [u8; 64] = sig_bytes
-        .as_slice()
-        .try_into()
-        .map_err(|_| SignatureError::InvalidSignatureEncoding("expected 64-byte signature".into()))?;
+    let sig_array: [u8; 64] = sig_bytes.as_slice().try_into().map_err(|_| {
+        SignatureError::InvalidSignatureEncoding("expected 64-byte signature".into())
+    })?;
 
     Ok(Signature::from_bytes(&sig_array))
 }

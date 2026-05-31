@@ -1,17 +1,17 @@
 use axum::{
+    Json, Router,
     extract::{Path, State},
     http::StatusCode,
     middleware,
     routing::{get, patch},
-    Json, Router,
 };
 use serde::Serialize;
 use std::sync::Arc;
 use uuid::Uuid;
 
 use crate::{
-    auth::{middleware::require_auth, AuthUser},
-    error::{api_error, ApiError},
+    auth::{AuthUser, middleware::require_auth},
+    error::{ApiError, api_error},
     models::Notification,
     services::notification_service::{NotificationService, NotificationServiceError},
     state::AppState,
@@ -32,9 +32,7 @@ pub fn router(state: Arc<AppState>) -> Router<Arc<AppState>> {
 
 fn notification_error(err: NotificationServiceError) -> ApiError {
     match err {
-        NotificationServiceError::NotFound => {
-            api_error(StatusCode::NOT_FOUND, err.to_string())
-        }
+        NotificationServiceError::NotFound => api_error(StatusCode::NOT_FOUND, err.to_string()),
         NotificationServiceError::Unavailable(message) => {
             api_error(StatusCode::SERVICE_UNAVAILABLE, message)
         }

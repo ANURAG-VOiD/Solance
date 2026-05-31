@@ -1,15 +1,16 @@
 use axum::{
+    Json, Router,
     extract::{Path, State},
     http::StatusCode,
     middleware,
     routing::{get, patch},
-    Json, Router,
 };
 use std::sync::Arc;
 use uuid::Uuid;
 
 use crate::{
-    auth::{middleware::require_auth, AuthUser},
+    auth::{AuthUser, middleware::require_auth},
+    error::{ApiError, api_error},
     models::{AcceptBidResponse, MyBidWithTask},
     services::{
         bid_service::{BidService, BidServiceError},
@@ -28,11 +29,13 @@ pub fn router(state: Arc<AppState>) -> Router<Arc<AppState>> {
 async fn list_my_bids(
     State(state): State<Arc<AppState>>,
     auth: AuthUser,
-) -> Result<Json<Vec<MyBidWithTask>>, StatusCode> {
+) -> Result<Json<Vec<MyBidWithTask>>, ApiError> {
     match BidService::list_my_bids(&state.db, &auth.wallet).await {
         Ok(bids) => Ok(Json(bids)),
-        Err(BidServiceError::Internal) => Err(StatusCode::INTERNAL_SERVER_ERROR),
-        Err(_) => Err(StatusCode::BAD_REQUEST),
+        Err(_) => Err(api_error(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Failed to load your applications",
+        )),
     }
 }
 
@@ -40,7 +43,7 @@ async fn accept_bid(
     State(state): State<Arc<AppState>>,
     auth: AuthUser,
     Path(id): Path<Uuid>,
-) -> Result<Json<AcceptBidResponse>, StatusCode> {
+) -> Result<Json<AcceptBidResponse>, ApiError> {
     match BidService::accept_bid(&state.db, id, &auth.wallet).await {
         Ok(response) => {
             let _ = NotificationService::create_notification(
@@ -58,12 +61,17 @@ async fn accept_bid(
 
             Ok(Json(response))
         }
-        Err(BidServiceError::NotFound) => Err(StatusCode::NOT_FOUND),
-        Err(BidServiceError::Forbidden) => Err(StatusCode::FORBIDDEN),
-        Err(BidServiceError::TaskNotOpen | BidServiceError::BidStateConflict) => {
-            Err(StatusCode::BAD_REQUEST)
+        Err(BidServiceError::NotFound) => Err(api_error(StatusCode::NOT_FOUND, "Bid not found")),
+        Err(BidServiceError::Forbidden) => Err(api_error(
+            StatusCode::FORBIDDEN,
+            "Only the job owner can accept this bid",
+        )),
+        Err(e @ (BidServiceError::TaskNotOpen | BidServiceError::BidStateConflict)) => {
+            Err(api_error(StatusCode::BAD_REQUEST, e.to_string()))
         }
-        Err(BidServiceError::Internal) => Err(StatusCode::INTERNAL_SERVER_ERROR),
-        Err(_) => Err(StatusCode::BAD_REQUEST),
+        Err(_) => Err(api_error(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Failed to accept bid",
+        )),
     }
 }

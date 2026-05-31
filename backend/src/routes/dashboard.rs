@@ -1,14 +1,9 @@
-use axum::{
-    extract::State,
-    http::StatusCode,
-    middleware,
-    routing::get,
-    Json, Router,
-};
+use axum::{Json, Router, extract::State, http::StatusCode, middleware, routing::get};
 use std::sync::Arc;
 
 use crate::{
-    auth::{middleware::require_auth, AuthUser},
+    auth::{AuthUser, middleware::require_auth},
+    error::{ApiError, api_error},
     models::DashboardStatsResponse,
     services::dashboard_service::{DashboardService, DashboardServiceError},
     state::AppState,
@@ -23,9 +18,12 @@ pub fn router(state: Arc<AppState>) -> Router<Arc<AppState>> {
 async fn get_dashboard_stats(
     State(state): State<Arc<AppState>>,
     auth: AuthUser,
-) -> Result<Json<DashboardStatsResponse>, StatusCode> {
+) -> Result<Json<DashboardStatsResponse>, ApiError> {
     match DashboardService::get_stats(&state.db, &auth.wallet).await {
         Ok(stats) => Ok(Json(stats)),
-        Err(DashboardServiceError::Internal) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+        Err(DashboardServiceError::Internal) => Err(api_error(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Failed to load dashboard stats",
+        )),
     }
 }

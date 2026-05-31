@@ -48,7 +48,10 @@ impl DashboardRepository {
         .await
     }
 
-    pub async fn count_pending_invoices_to_receive(&self, wallet: &str) -> Result<i64, sqlx::Error> {
+    pub async fn count_pending_invoices_to_receive(
+        &self,
+        wallet: &str,
+    ) -> Result<i64, sqlx::Error> {
         sqlx::query_scalar::<_, i64>(
             r#"
             SELECT COUNT(*)::BIGINT

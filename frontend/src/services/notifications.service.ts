@@ -1,7 +1,8 @@
 import { authFetch } from "@/services/api-client";
 import type { Notification, NotificationType } from "@/types";
 
-interface BackendNotification {
+/** Raw notification shape returned by the backend (snake_case fields). */
+export interface BackendNotification {
   id: string;
   notification_type: NotificationType;
   title: string;
@@ -11,7 +12,8 @@ interface BackendNotification {
   read: boolean;
 }
 
-function normalizeNotification(input: BackendNotification): Notification {
+/** Map a backend notification to the camelCase frontend `Notification` type. */
+export function normalizeNotification(input: BackendNotification): Notification {
   return {
     id: input.id,
     type: input.notification_type,

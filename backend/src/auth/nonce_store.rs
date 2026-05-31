@@ -28,10 +28,7 @@ impl NonceStore {
 
     /// Replace any existing nonce for this wallet with a fresh challenge.
     pub async fn upsert(&self, wallet_address: String, nonce: StoredNonce) {
-        self.inner
-            .write()
-            .await
-            .insert(wallet_address, nonce);
+        self.inner.write().await.insert(wallet_address, nonce);
     }
 
     /// Return a stored nonce if it exists and has not expired.
@@ -45,7 +42,8 @@ impl NonceStore {
     /// Remove and return a nonce (used during signature verification).
     pub async fn take(&self, wallet_address: &str) -> Option<StoredNonce> {
         let mut map = self.inner.write().await;
-        map.remove(wallet_address).filter(|nonce| nonce.expires_at > Utc::now())
+        map.remove(wallet_address)
+            .filter(|nonce| nonce.expires_at > Utc::now())
     }
 }
 

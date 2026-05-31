@@ -14,8 +14,7 @@ impl Config {
     /// Panics if `DATABASE_URL` or `JWT_SECRET` is not set.
     pub fn from_env() -> Self {
         let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
-        let database_url =
-            env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+        let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
         let jwt_secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
         let frontend_url =
             env::var("FRONTEND_URL").unwrap_or_else(|_| "http://localhost:3000".to_string());

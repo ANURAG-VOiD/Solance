@@ -21,6 +21,7 @@ import { useInvoiceForm } from "@/hooks/useInvoiceForm";
 import { useInvoices } from "@/hooks/useInvoices";
 import { useAuth } from "@/context/AuthContext";
 import { createInvoice } from "@/services/invoices.service";
+import { truncateWallet } from "@/lib/utils";
 import type { InvoicePricingType } from "@/types/invoice";
 
 export function InvoiceWorkspace() {
@@ -38,6 +39,10 @@ export function InvoiceWorkspace() {
     [projectList, form.selectedProjectId],
   );
 
+  // The editable section + preview are active for either an invoicing flow:
+  // a selected project, or a from-scratch ("blank") invoice.
+  const formActive = selectedProject != null || form.mode === "blank";
+
   const handleSelectProject = (project: (typeof projectList)[number]) => {
     form.selectProject(project);
   };
@@ -53,7 +58,7 @@ export function InvoiceWorkspace() {
   };
 
   const handleGenerate = async () => {
-    if (!selectedProject || !form.validate()) return;
+    if (!formActive || !form.validate()) return;
 
     setSubmitting(true);
     setSubmitError(null);
@@ -92,6 +97,11 @@ export function InvoiceWorkspace() {
             <Link href="/marketplace">
               <Button variant="secondary" size="sm">Browse jobs</Button>
             </Link>
+            {/* Let anyone start an invoice from scratch — no project required. */}
+            <Button size="sm" onClick={form.startBlank}>
+              <Plus className="h-4 w-4" />
+              New blank invoice
+            </Button>
           </div>
         }
       />
@@ -104,6 +114,22 @@ export function InvoiceWorkspace() {
               <h2 className="text-sm font-semibold">Step 1 — Select project</h2>
             </div>
 
+            {/* Blank-invoice notice: clarifies the manual flow and offers a way back. */}
+            {form.mode === "blank" && (
+              <div className="mb-4 flex items-center justify-between gap-3 rounded-md border border-brand/30 bg-brand/10 px-3 py-2 text-xs">
+                <span className="text-text">
+                  Creating a blank invoice — fill in the client and amount below.
+                </span>
+                <button
+                  type="button"
+                  onClick={form.resetForm}
+                  className="shrink-0 font-medium text-brand hover:underline"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+
             {projects.isLoading && <LoadingState label="Loading your projects…" />}
             {projects.error && (
               <ErrorState message={projects.error} onRetry={projects.reload} />
@@ -111,8 +137,8 @@ export function InvoiceWorkspace() {
             {!projects.isLoading && !projects.error && projectList.length === 0 && (
               <EmptyState
                 title="No active projects"
-                description="Apply to jobs and get hired to generate project-aware invoices. Accepted work appears here automatically."
-                action={{ label: "Browse marketplace", href: "/marketplace" }}
+                description="Get hired to generate project-aware invoices, or start a blank invoice and enter the details yourself."
+                action={{ label: "Create blank invoice", onClick: form.startBlank }}
               />
             )}
             {!projects.isLoading && projectList.length > 0 && (
@@ -125,14 +151,14 @@ export function InvoiceWorkspace() {
             )}
           </Card>
 
-          {selectedProject && (
+          {formActive && (
             <>
               <ClientInfoCard
                 client={form.client}
                 onChange={(patch) => {
                   form.updateClient(patch);
                 }}
-                autoFilled
+                autoFilled={form.mode === "project"}
                 error={form.errors.wallet}
               />
 
@@ -186,7 +212,10 @@ export function InvoiceWorkspace() {
             details={form.details}
             calculations={form.calculations}
             freelancerWallet={user?.wallet_address ?? ""}
-            freelancerName={user?.title ?? user?.wallet_address ?? ""}
+            freelancerName={
+              user?.title ||
+              (user ? truncateWallet(user.wallet_address) : "")
+            }
           />
         </div>
       </div>
